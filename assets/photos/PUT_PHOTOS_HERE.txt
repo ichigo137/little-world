@@ -1,0 +1,6 @@
+Drop your photos in this folder (e.g. us_at_the_beach.jpg),
+then reference them in lib/content.dart like:
+
+  MemoryItem(message: 'caption here', photoAsset: 'assets/photos/us_at_the_beach.jpg'),
+
+Keep filenames lowercase with no spaces to be safe.
