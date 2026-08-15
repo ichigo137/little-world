@@ -57,7 +57,7 @@ class _GiftScreenState extends State<GiftScreen> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       body: AnimatedSkyBackground(
-        gradientColors: const [AppTheme.lavender, AppTheme.blush, AppTheme.peach],
+        gradientColors: AppTheme.nightRose,
         showClouds: true,
         child: Center(
           child: Column(
@@ -91,7 +91,7 @@ class _GiftScreenState extends State<GiftScreen> with TickerProviderStateMixin {
                 style: GoogleFonts.caveat(
                   fontSize: 34,
                   fontWeight: FontWeight.bold,
-                  color: AppTheme.textDark,
+                  color: AppTheme.textLight,
                 ),
               ),
               const SizedBox(height: 8),
@@ -100,7 +100,7 @@ class _GiftScreenState extends State<GiftScreen> with TickerProviderStateMixin {
                 textAlign: TextAlign.center,
                 style: GoogleFonts.comfortaa(
                   fontSize: 14,
-                  color: AppTheme.textDark.withOpacity(0.8),
+                  color: AppTheme.textSoft,
                 ),
               ),
               const SizedBox(height: 28),
@@ -114,7 +114,7 @@ class _GiftScreenState extends State<GiftScreen> with TickerProviderStateMixin {
                   'tap to open your gift',
                   style: GoogleFonts.comfortaa(
                     fontSize: 13,
-                    color: AppTheme.textDark.withOpacity(0.7),
+                    color: AppTheme.textSoft.withValues(alpha: 0.9),
                   ),
                 ),
               ),

@@ -78,7 +78,7 @@ class _StarryHillScreenState extends State<StarryHillScreen>
                 SectionHeader(
                   title: 'Starry Hill',
                   subtitle: _showMessage ? '' : 'tap the sky, one star at a time',
-                  color: Colors.white,
+                  color: AppTheme.textLight,
                 ),
                 Expanded(
                   child: Stack(
@@ -112,15 +112,19 @@ class _StarryHillScreenState extends State<StarryHillScreen>
                               margin: const EdgeInsets.all(28),
                               padding: const EdgeInsets.all(20),
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.95),
+                                color: AppTheme.nightSoft.withValues(alpha: 0.92),
                                 borderRadius: BorderRadius.circular(18),
+                                border: Border.all(
+                                  color: AppTheme.lavender.withValues(alpha: 0.35),
+                                  width: 1,
+                                ),
                               ),
                               child: Text(
                                 AppContent.constellationMessage,
                                 textAlign: TextAlign.center,
                                 style: GoogleFonts.comfortaa(
                                   fontSize: 14,
-                                  color: AppTheme.textDark,
+                                  color: AppTheme.textLight,
                                   height: 1.5,
                                   fontWeight: FontWeight.w600,
                                 ),

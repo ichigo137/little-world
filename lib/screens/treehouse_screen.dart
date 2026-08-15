@@ -44,7 +44,7 @@ class _TreehouseScreenState extends State<TreehouseScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: AnimatedSkyBackground(
-        gradientColors: const [Color(0xFFCFE8C6), AppTheme.cream],
+        gradientColors: AppTheme.nightMoss,
         showClouds: true,
         child: SafeArea(
           child: Column(
@@ -88,10 +88,10 @@ class _TreehouseScreenState extends State<TreehouseScreen> {
                                       decoration: BoxDecoration(
                                         color: _lit[i]
                                             ? const Color(0xFFFFE9A8)
-                                            : const Color(0xFF6B5240),
+                                            : const Color(0xFF3F3126),
                                         borderRadius: BorderRadius.circular(8),
                                         border: Border.all(
-                                          color: const Color(0xFF4A3B2F),
+                                          color: const Color(0xFF2E241C),
                                           width: 3,
                                         ),
                                         boxShadow: _lit[i]
@@ -128,9 +128,9 @@ class _TreehouseScreenState extends State<TreehouseScreen> {
 class _TreehousePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final trunkPaint = Paint()..color = const Color(0xFF8A6A4F);
-    final leafPaint = Paint()..color = const Color(0xFF9BCB8F);
-    final houseTint = Paint()..color = const Color(0xFF7A5B43);
+    final trunkPaint = Paint()..color = const Color(0xFF6E5544);
+    final leafPaint = Paint()..color = const Color(0xFF7FA97C);
+    final houseTint = Paint()..color = const Color(0xFF5E4638);
 
     canvas.drawRect(
       Rect.fromLTWH(size.width * 0.42, size.height * 0.55, size.width * 0.16, size.height * 0.45),
@@ -153,7 +153,7 @@ class _TreehousePainter extends CustomPainter {
       ..lineTo(size.width * 0.5, size.height * 0.15)
       ..lineTo(size.width * 0.9, size.height * 0.35)
       ..close();
-    canvas.drawPath(roofPath, Paint()..color = const Color(0xFF5C4433));
+    canvas.drawPath(roofPath, Paint()..color = const Color(0xFF46342A));
   }
 
   @override

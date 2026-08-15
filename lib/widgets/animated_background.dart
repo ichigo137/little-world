@@ -100,7 +100,7 @@ class _SkyPainter extends CustomPainter {
       }
     }
     if (showClouds) {
-      final cloudPaint = Paint()..color = Colors.white.withOpacity(0.85);
+      final cloudPaint = Paint()..color = Colors.white.withValues(alpha: 0.12);
       for (int i = 0; i < 4; i++) {
         final rand = Random(i * 13 + 5);
         final speed = 0.3 + rand.nextDouble() * 0.5;

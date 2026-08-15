@@ -15,7 +15,7 @@ Future<void> showMemoryReveal(
     context: context,
     barrierDismissible: true,
     barrierLabel: 'memory',
-    barrierColor: Colors.black.withOpacity(0.35),
+    barrierColor: Colors.black.withOpacity(0.55),
     transitionDuration: const Duration(milliseconds: 550),
     pageBuilder: (context, anim1, anim2) => const SizedBox.shrink(),
     transitionBuilder: (context, anim, secondaryAnim, child) {

@@ -16,7 +16,7 @@ class SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textColor = color ?? AppTheme.textDark;
+    final textColor = color ?? AppTheme.textLight;
     return Padding(
       padding: const EdgeInsets.only(top: 4, bottom: 4),
       child: Column(

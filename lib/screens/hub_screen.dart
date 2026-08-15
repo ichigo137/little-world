@@ -19,7 +19,7 @@ class HubScreen extends StatelessWidget {
     final journey = context.watch<JourneyState>();
     return Scaffold(
       body: AnimatedSkyBackground(
-        gradientColors: const [AppTheme.mint, AppTheme.cream],
+        gradientColors: AppTheme.nightMoss,
         showClouds: true,
         child: SafeArea(
           child: Column(
@@ -30,14 +30,14 @@ class HubScreen extends StatelessWidget {
                 style: GoogleFonts.caveat(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: AppTheme.textDark,
+                  color: AppTheme.textLight,
                 ),
               ),
               Text(
                 'tap around and explore, ${AppContent.herName}',
                 style: GoogleFonts.comfortaa(
                   fontSize: 13,
-                  color: AppTheme.textDark.withOpacity(0.7),
+                  color: AppTheme.textSoft,
                 ),
               ),
               const Spacer(),

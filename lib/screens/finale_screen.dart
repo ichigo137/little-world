@@ -73,11 +73,7 @@ class _FinaleScreenState extends State<FinaleScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       body: AnimatedSkyBackground(
-        gradientColors: const [
-          AppTheme.peach,
-          AppTheme.blush,
-          AppTheme.lavender
-        ],
+        gradientColors: AppTheme.nightRose,
         showClouds: true,
         child: Stack(
           children: [
@@ -119,7 +115,7 @@ class _FinaleScreenState extends State<FinaleScreen>
           'Make a wish...',
           style: GoogleFonts.caveat(
             fontSize: 30,
-            color: AppTheme.textDark,
+            color: AppTheme.textLight,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -151,11 +147,15 @@ class _FinaleScreenState extends State<FinaleScreen>
                 height: 96,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white,
+                  color: AppTheme.nightSoft,
                   boxShadow: [
                     BoxShadow(
-                        color: Colors.black.withOpacity(0.1), blurRadius: 12),
+                        color: Colors.black.withOpacity(0.45), blurRadius: 16),
                   ],
+                  border: Border.all(
+                    color: AppTheme.lavender.withValues(alpha: 0.4),
+                    width: 1.5,
+                  ),
                 ),
                 child: Stack(
                   alignment: Alignment.center,
@@ -170,7 +170,7 @@ class _FinaleScreenState extends State<FinaleScreen>
                         backgroundColor: AppTheme.gold.withOpacity(0.15),
                       ),
                     ),
-                    const Icon(Icons.air, color: AppTheme.textDark, size: 30),
+                    const Icon(Icons.air, color: AppTheme.textLight, size: 30),
                   ],
                 ),
               );
@@ -181,7 +181,7 @@ class _FinaleScreenState extends State<FinaleScreen>
         Text(
           'hold to blow',
           style: GoogleFonts.comfortaa(
-              fontSize: 12, color: AppTheme.textDark.withOpacity(0.6)),
+              fontSize: 12, color: AppTheme.textSoft), 
         ),
       ],
     );
@@ -214,33 +214,40 @@ class _FinaleScreenState extends State<FinaleScreen>
               style: GoogleFonts.caveat(
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
-                color: AppTheme.textDark,
+                color: AppTheme.textLight,
               ),
             ),
             const SizedBox(height: 20),
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.9),
+                color: AppTheme.nightSoft.withValues(alpha: 0.92),
                 borderRadius: BorderRadius.circular(18),
+                border: Border.all(
+                  color: AppTheme.lavender.withValues(alpha: 0.35),
+                  width: 1,
+                ),
               ),
               child: Text(
                 AppContent.finaleMessage,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.comfortaa(
-                    fontSize: 14, height: 1.6, color: AppTheme.textDark),
+                    fontSize: 14, height: 1.6, color: AppTheme.textLight),
               ),
             ),
             const SizedBox(height: 24),
             TextButton(
               onPressed: () => _openSecret(context),
               style: TextButton.styleFrom(
-                backgroundColor: AppTheme.blush.withValues(alpha: 0.5),
-                foregroundColor: AppTheme.textDark,
+                backgroundColor: AppTheme.blush.withValues(alpha: 0.16),
+                foregroundColor: AppTheme.textLight,
                 padding:
                     const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
                 shape: const StadiumBorder(),
-                side: const BorderSide(color: AppTheme.blush, width: 1.5),
+                side: const BorderSide(
+                  color: AppTheme.blush,
+                  width: 1.5,
+                ),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -252,7 +259,7 @@ class _FinaleScreenState extends State<FinaleScreen>
                     style: GoogleFonts.caveat(
                       fontSize: 19,
                       fontWeight: FontWeight.bold,
-                      color: AppTheme.textDark,
+                      color: AppTheme.textLight,
                     ),
                   ),
                 ],
@@ -267,10 +274,10 @@ class _FinaleScreenState extends State<FinaleScreen>
                   (route) => false,
                 );
               },
-              icon: const Icon(Icons.replay_rounded, color: AppTheme.textDark),
+              icon: const Icon(Icons.replay_rounded, color: AppTheme.textSoft),
               label: Text(
                 'replay the journey',
-                style: GoogleFonts.comfortaa(color: AppTheme.textDark),
+                style: GoogleFonts.comfortaa(color: AppTheme.textSoft),
               ),
             ),
           ],
@@ -387,7 +394,7 @@ class _CandlePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final waxPaint = Paint()..color = AppTheme.blush;
     final wickPaint = Paint()
-      ..color = const Color(0xFF4A3B4F)
+      ..color = const Color(0xFFCFC4E8)
       ..strokeWidth = 2;
     final baseY = size.height - 20;
 

@@ -33,7 +33,7 @@ class _GardenScreenState extends State<GardenScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: AnimatedSkyBackground(
-        gradientColors: const [AppTheme.mint, AppTheme.cream],
+        gradientColors: AppTheme.nightMoss,
         showClouds: true,
         child: SafeArea(
           child: Column(

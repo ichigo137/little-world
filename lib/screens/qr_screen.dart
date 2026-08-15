@@ -59,7 +59,7 @@ class _QrScreenState extends State<QrScreen>
             style: GoogleFonts.comfortaa(),
           ),
           behavior: SnackBarBehavior.floating,
-          backgroundColor: AppTheme.textDark,
+          backgroundColor: AppTheme.nightSoft,
         ),
       );
     }
@@ -69,11 +69,7 @@ class _QrScreenState extends State<QrScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       body: AnimatedSkyBackground(
-        gradientColors: const [
-          AppTheme.lavender,
-          AppTheme.blush,
-          AppTheme.peach
-        ],
+        gradientColors: AppTheme.nightRose,
         showClouds: true,
         child: SafeArea(
           child: Column(
@@ -199,7 +195,7 @@ class _QrScreenState extends State<QrScreen>
                             'scan it, or tap the code to open it',
                             style: GoogleFonts.comfortaa(
                               fontSize: 12,
-                              color: AppTheme.textDark.withValues(alpha: 0.8),
+                              color: AppTheme.textSoft,
                             ),
                           ),
                         ),
@@ -207,8 +203,8 @@ class _QrScreenState extends State<QrScreen>
                         FilledButton.icon(
                           onPressed: _openLink,
                           style: FilledButton.styleFrom(
-                            backgroundColor: AppTheme.textDark,
-                            foregroundColor: Colors.white,
+                            backgroundColor: AppTheme.lavender,
+                            foregroundColor: AppTheme.nightDeep,
                             padding: const EdgeInsets.symmetric(
                               horizontal: 26,
                               vertical: 14,

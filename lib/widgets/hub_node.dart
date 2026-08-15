@@ -69,7 +69,9 @@ class _HubNodeState extends State<HubNode> with SingleTickerProviderStateMixin {
               height: 74,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: widget.locked ? Colors.grey.shade300 : widget.color,
+                color: widget.locked
+                    ? Colors.white.withValues(alpha: 0.1)
+                    : widget.color,
                 boxShadow: widget.locked
                     ? []
                     : [
@@ -85,7 +87,9 @@ class _HubNodeState extends State<HubNode> with SingleTickerProviderStateMixin {
               ),
               child: Icon(
                 widget.locked ? Icons.lock_rounded : widget.icon,
-                color: Colors.white,
+                color: widget.locked
+                    ? Colors.white.withValues(alpha: 0.35)
+                    : Colors.white,
                 size: 32,
               ),
             ),
@@ -94,7 +98,9 @@ class _HubNodeState extends State<HubNode> with SingleTickerProviderStateMixin {
               widget.label,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: widget.locked ? Colors.grey : AppTheme.textDark,
+                color: widget.locked
+                    ? Colors.white.withValues(alpha: 0.4)
+                    : AppTheme.textLight,
                 fontSize: 13,
               ),
             ),
