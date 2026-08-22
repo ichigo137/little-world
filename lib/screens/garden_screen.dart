@@ -124,7 +124,7 @@ class _Flower extends StatelessWidget {
               size: 44,
               color: bloomed ? color : Colors.green.shade300,
             ),
-            if (bloomed) Icon(Icons.circle, size: 6, color: color.withOpacity(0.6)),
+            if (bloomed) Icon(Icons.circle, size: 6, color: color.withValues(alpha: 0.6)),
           ],
         ),
       ),

@@ -76,7 +76,7 @@ class _HubNodeState extends State<HubNode> with SingleTickerProviderStateMixin {
                     ? []
                     : [
                         BoxShadow(
-                          color: widget.color.withOpacity(0.5),
+                          color: widget.color.withValues(alpha: 0.5),
                           blurRadius: 18,
                           spreadRadius: 2,
                         ),

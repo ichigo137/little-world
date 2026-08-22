@@ -41,7 +41,7 @@ class SectionHeader extends StatelessWidget {
             subtitle,
             style: GoogleFonts.comfortaa(
               fontSize: 12,
-              color: textColor.withOpacity(0.75),
+              color: textColor.withValues(alpha: 0.75),
             ),
           ),
         ],

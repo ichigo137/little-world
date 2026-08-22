@@ -156,7 +156,7 @@ class _GiftBoxPainter extends CustomPainter {
     final center = Offset(size.width * 0.5, size.height * 0.22);
     canvas.drawCircle(center.translate(-14, 0), 14, ribbonPaint);
     canvas.drawCircle(center.translate(14, 0), 14, ribbonPaint);
-    canvas.drawCircle(center, 8, Paint()..color = AppTheme.gold.withOpacity(0.9));
+    canvas.drawCircle(center, 8, Paint()..color = AppTheme.gold.withValues(alpha: 0.9));
   }
 
   @override

@@ -152,10 +152,10 @@ class _ConstellationPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final linePaint = Paint()
-      ..color = Colors.white.withOpacity(0.6)
+      ..color = Colors.white.withValues(alpha: 0.6)
       ..strokeWidth = 1.5;
     final starPaint = Paint()..color = Colors.white;
-    final glowPaint = Paint()..color = AppTheme.gold.withOpacity(0.6);
+    final glowPaint = Paint()..color = AppTheme.gold.withValues(alpha: 0.6);
 
     Offset? prev;
     for (int i = 0; i < revealed && i < points.length; i++) {
@@ -186,7 +186,7 @@ class _ShootingStarPainter extends CustomPainter {
     final pos = Offset.lerp(start, end, progress)!;
     final tailPaint = Paint()
       ..shader = LinearGradient(
-        colors: [Colors.white.withOpacity(0), Colors.white],
+        colors: [Colors.white.withValues(alpha: 0), Colors.white],
       ).createShader(Rect.fromPoints(start, pos))
       ..strokeWidth = 2;
     canvas.drawLine(start, pos, tailPaint);

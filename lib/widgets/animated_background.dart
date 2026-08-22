@@ -95,7 +95,7 @@ class _SkyPainter extends CustomPainter {
         final dx = rand.nextDouble() * size.width;
         final dy = rand.nextDouble() * size.height * 0.65;
         final twinkle = (sin(progress * 2 * pi * 2 + i) + 1) / 2;
-        starPaint.color = Colors.white.withOpacity(0.25 + twinkle * 0.75);
+        starPaint.color = Colors.white.withValues(alpha: 0.25 + twinkle * 0.75);
         canvas.drawCircle(Offset(dx, dy), 1.0 + (i % 3) * 0.6, starPaint);
       }
     }

@@ -15,7 +15,7 @@ Future<void> showMemoryReveal(
     context: context,
     barrierDismissible: true,
     barrierLabel: 'memory',
-    barrierColor: Colors.black.withOpacity(0.55),
+    barrierColor: Colors.black.withValues(alpha: 0.55),
     transitionDuration: const Duration(milliseconds: 550),
     pageBuilder: (context, anim1, anim2) => const SizedBox.shrink(),
     transitionBuilder: (context, anim, secondaryAnim, child) {
@@ -54,7 +54,7 @@ class _MemoryCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(18),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.15),
+                  color: Colors.black.withValues(alpha: 0.15),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -103,7 +103,7 @@ class _MemoryCard extends StatelessWidget {
       height: 140,
       width: double.infinity,
       decoration: BoxDecoration(
-        color: accent.withOpacity(0.15),
+        color: accent.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Icon(Icons.favorite_rounded, color: accent, size: 42),

@@ -98,7 +98,7 @@ class _TreehouseScreenState extends State<TreehouseScreen> {
                                             ? [
                                                 BoxShadow(
                                                   color: const Color(0xFFFFE9A8)
-                                                      .withOpacity(0.8),
+                                                      .withValues(alpha: 0.8),
                                                   blurRadius: 16,
                                                   spreadRadius: 2,
                                                 ),

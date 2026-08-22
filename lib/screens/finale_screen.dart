@@ -150,7 +150,7 @@ class _FinaleScreenState extends State<FinaleScreen>
                   color: AppTheme.nightSoft,
                   boxShadow: [
                     BoxShadow(
-                        color: Colors.black.withOpacity(0.45), blurRadius: 16),
+                        color: Colors.black.withValues(alpha: 0.45), blurRadius: 16),
                   ],
                   border: Border.all(
                     color: AppTheme.lavender.withValues(alpha: 0.4),
@@ -167,7 +167,7 @@ class _FinaleScreenState extends State<FinaleScreen>
                         value: _blowProgress.value,
                         strokeWidth: 5,
                         color: AppTheme.gold,
-                        backgroundColor: AppTheme.gold.withOpacity(0.15),
+                        backgroundColor: AppTheme.gold.withValues(alpha: 0.15),
                       ),
                     ),
                     const Icon(Icons.air, color: AppTheme.textLight, size: 30),
@@ -379,7 +379,7 @@ class _BalloonState extends State<_Balloon>
                 color: widget.color, borderRadius: BorderRadius.circular(20)),
           ),
           Container(
-              width: 1.5, height: 30, color: widget.color.withOpacity(0.5)),
+              width: 1.5, height: 30, color: widget.color.withValues(alpha: 0.5)),
         ],
       ),
     );
@@ -416,10 +416,10 @@ class _CandlePainter extends CustomPainter {
       final flameBaseY = size.height * 0.3 - 10;
       final flameTop = Offset(size.width * 0.5, flameBaseY - flameHeight);
       final flamePaint = Paint()
-        ..shader = LinearGradient(
+        ..shader = const LinearGradient(
           begin: Alignment.bottomCenter,
           end: Alignment.topCenter,
-          colors: const [Color(0xFFF6C066), Color(0xFFEF9FBF)],
+          colors: [Color(0xFFF6C066), Color(0xFFEF9FBF)],
         ).createShader(
             Rect.fromLTWH(size.width * 0.5 - 10, flameTop.dy, 20, flameHeight));
       final path = Path()
