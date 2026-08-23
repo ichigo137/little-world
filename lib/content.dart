@@ -13,7 +13,7 @@ class MemoryItem {
 /// ============================================================
 class AppContent {
   // Shown on the very first screen and on the finale card.
-  static const String herName = 'Put Her Name Here';
+  static const String herName = 'MISHTU';
 
   // Small line under her name on the gift screen.
   static const String heroTagline = 'a tiny world I built, just for you';
@@ -24,16 +24,16 @@ class AppContent {
   static const List<MemoryItem> gardenMemories = [
     MemoryItem(
         message:
-            'The first time we talked, I knew this year would be different.'),
+            'The first time we talked, I knew this year would be different.', photoAsset: null),
     MemoryItem(
         message:
-            'That random Tuesday we laughed for two hours straight over nothing.'),
-    MemoryItem(message: 'The way you say my name right before you roast me.'),
+            'That random Tuesday we laughed for two hours straight over nothing.', photoAsset: null),
+    MemoryItem(message: 'The way you say my name right before you roast me.', photoAsset: null),
     MemoryItem(
-        message: 'Every playlist you\'ve ever sent me — still on repeat.'),
+        message: 'Every playlist you\'ve ever sent me — still on repeat.', photoAsset: null),
     MemoryItem(
-        message: 'The dumb inside joke only the two of us will ever get.'),
-    MemoryItem(message: 'You, in general. That\'s the memory.'),
+        message: 'The dumb inside joke only the two of us will ever get.', photoAsset: null),
+    MemoryItem(message: 'You, in general. That\'s the memory.', photoAsset: null),
   ];
 
   // ---------------- THE TREEHOUSE ----------------
