@@ -7,6 +7,7 @@ import 'package:her_little_world/content.dart';
 import 'package:her_little_world/main.dart';
 import 'package:her_little_world/screens/garden_screen.dart';
 import 'package:her_little_world/screens/hub_screen.dart';
+import 'package:her_little_world/screens/playlist_screen.dart';
 import 'package:her_little_world/state/journey_state.dart';
 
 void main() {
@@ -100,6 +101,21 @@ void main() {
         find.text(AppContent.gardenMemories.first.message),
         findsOneWidget,
       );
+    });
+  });
+
+  group('Playlist', () {
+    testWidgets('renders the in-app player with the bundled tracks',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(const MaterialApp(home: PlaylistScreen()));
+      await tester.pump();
+
+      expect(find.text('the soundtrack of us'), findsOneWidget);
+      expect(find.text('demo melody'), findsWidgets);
+      expect(find.text('made just for you'), findsWidgets);
+      // Player controls should be present.
+      expect(find.byIcon(Icons.skip_next_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.play_arrow_rounded), findsOneWidget);
     });
   });
 

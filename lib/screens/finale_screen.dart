@@ -7,13 +7,13 @@ import 'package:provider/provider.dart';
 import 'package:confetti/confetti.dart';
 import 'package:noise_meter/noise_meter.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../content.dart';
 import '../state/journey_state.dart';
 import '../theme/app_theme.dart';
 import '../widgets/animated_background.dart';
 import '../services/audio_manager.dart';
 import 'gift_screen.dart';
+import 'playlist_screen.dart';
 import 'qr_screen.dart';
 
 class FinaleScreen extends StatefulWidget {
@@ -419,7 +419,7 @@ class _FinaleScreenState extends State<FinaleScreen>
             ),
             const SizedBox(height: 8),
             TextButton.icon(
-              onPressed: _openSpotify,
+              onPressed: () => _openPlaylist(context),
               icon: const Icon(Icons.music_note_rounded, color: AppTheme.mint),
               label: Text(
                 'the soundtrack of us',
@@ -447,25 +447,24 @@ class _FinaleScreenState extends State<FinaleScreen>
     );
   }
 
-  Future<void> _openSpotify() async {
-    final uri = Uri.parse(AppContent.spotifyPlaylistUrl);
-    try {
-      final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
-      if (!ok && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'couldn\u2019t open Spotify from here',
-              style: GoogleFonts.comfortaa(),
+  void _openPlaylist(BuildContext context) {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        transitionDuration: const Duration(milliseconds: 500),
+        pageBuilder: (context, anim, secAnim) => const PlaylistScreen(),
+        transitionsBuilder: (context, anim, secAnim, child) {
+          final curved =
+              CurvedAnimation(parent: anim, curve: Curves.easeOutCubic);
+          return FadeTransition(
+            opacity: curved,
+            child: ScaleTransition(
+              scale: Tween(begin: 0.92, end: 1.0).animate(curved),
+              child: child,
             ),
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: AppTheme.nightSoft,
-          ),
-        );
-      }
-    } catch (_) {
-      // Ignore.
-    }
+          );
+        },
+      ),
+    );
   }
 
   void _openSecret(BuildContext context) {

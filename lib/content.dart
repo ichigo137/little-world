@@ -5,6 +5,22 @@ class MemoryItem {
   const MemoryItem({required this.message, this.photoAsset});
 }
 
+/// One song in the Spotify-style in-app playlist.
+class PlaylistTrack {
+  final String title;
+  final String artist;
+  final String audioAsset;
+  final String? coverAsset;
+  final Duration? duration;
+  const PlaylistTrack({
+    required this.title,
+    required this.artist,
+    required this.audioAsset,
+    this.coverAsset,
+    this.duration,
+  });
+}
+
 /// ============================================================
 ///   EDIT ME — this is the ONLY file you need to touch to make
 ///   the app yours. Change the text, drop photos into
@@ -61,11 +77,30 @@ class AppContent {
       'https://secret-site-for-birt.onrender.com';
 
   // ---------------- THE PLAYLIST ----------------
-  // The "tracklist of us" — opens in the Spotify app / web player.
-  // Grab your playlist's share link and paste it here, e.g.
-  // 'https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M'
-  static const String spotifyPlaylistUrl =
-      'https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M';
+  // Songs for the Spotify-style player on the finale screen.
+  // Drop your MP3/WAV files into assets/music/, then list them here.
+  // Asset paths are relative to the assets/ folder, so a file at
+  // assets/music/track.mp3 is referenced as 'music/track.mp3'.
+  //
+  //  PlaylistTrack(
+  //    title: 'Your Song',
+  //    artist: 'Imagine A Name',
+  //    audioAsset: 'music/your_song.mp3',
+  //    coverAsset: 'music/cover.jpg',        // optional artwork
+  //    duration: Duration(minutes: 3, seconds: 45), // optional
+  //  ),
+  //
+  // 'demo_melody.wav' is a placeholder I generate for you so the
+  // screen is testable — delete that track (and file) once your real
+  // songs are in.
+  static const List<PlaylistTrack> finalePlaylist = [
+    PlaylistTrack(
+      title: 'demo melody',
+      artist: 'made just for you',
+      audioAsset: 'music/demo_melody.wav',
+      duration: Duration(seconds: 20),
+    ),
+  ];
 
   // ---------------- THE FINALE ----------------
   static const String finaleTitle = 'Happy Birthday';

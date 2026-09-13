@@ -49,10 +49,5 @@
             <action android:name="android.intent.action.VIEW"/>
             <data android:scheme="https"/>
         </intent>
-        <!-- Lets url_launcher detect the Spotify app for the playlist deep link. -->
-        <intent>
-            <action android:name="android.intent.action.VIEW"/>
-            <data android:scheme="spotify"/>
-        </intent>
     </queries>
 </manifest>

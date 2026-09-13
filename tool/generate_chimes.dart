@@ -47,8 +47,14 @@ void main() {
   final ambient = _buildAmbient();
   _writeWav(outDir, 'ambient.wav', ambient);
 
+  final musicDir = Directory('assets/music');
+  musicDir.createSync(recursive: true);
+  final demo = _buildDemo();
+  _writeWav(musicDir, 'demo_melody.wav', demo);
+
   stdout.writeln('Generated chimes in ${outDir.path}: '
       'bloom, window, star, complete, candle, ambient');
+  stdout.writeln('Generated demo track in ${musicDir.path}: demo_melody.wav');
 }
 
 class _Bar {
@@ -139,6 +145,44 @@ List<double> _buildAmbient() {
     }
   }
   return _normalizeBy(out, 1.2);
+}
+
+List<double> _buildDemo() {
+  const seconds = 20.0;
+  final n = (_sr * seconds).floor();
+  final out = List<double>.filled(n, 0);
+  // C / G / Am / F — a gentle, warm chord loop (2s per bar).
+  const chordBars = [
+    [261.63, 329.63, 392.00],
+    [196.00, 246.94, 293.66],
+    [220.00, 261.63, 329.63],
+    [174.61, 220.00, 261.63],
+  ];
+  const barSec = 2.0;
+  for (int b = 0; b < 10; b++) {
+    final chord = chordBars[b % chordBars.length];
+    final barStart = (b * barSec * _sr).floor();
+    _addPluck(out, barStart, chord[0] / 2, 0.5, 1.8);
+    for (int e = 0; e < 8; e++) {
+      final note = chord[e % 3] * (e >= 4 ? 2 : 1);
+      final t = (e * 0.25 * _sr).floor();
+      _addPluck(out, barStart + t, note, 0.26, 0.5);
+    }
+  }
+  return _normalizeBy(out, 0.7);
+}
+
+void _addPluck(List<double> out, int startSample, double freq, double amp,
+    double decaySec) {
+  final n = out.length - startSample;
+  if (n <= 0) return;
+  for (int i = 0; i < n; i++) {
+    final t = i / _sr;
+    final env = math.exp(-i / (decaySec * _sr));
+    var s = math.sin(2 * math.pi * freq * t) * env;
+    s += 0.25 * math.sin(2 * math.pi * freq * 2 * t) * env;
+    out[startSample + i] += s * amp * 0.5;
+  }
 }
 
 List<double> _normalize(List<double> x) {

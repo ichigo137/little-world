@@ -1,0 +1,16 @@
+Drop your songs here (.mp3 or .wav — keep filenames lowercase,
+spaces/symbols out, e.g. our_song.mp3).
+
+Then open lib/content.dart -> finalePlaylist and add one
+PlaylistTrack per song, like:
+
+  PlaylistTrack(
+    title: 'Your Song',
+    artist: 'Artist Name',
+    audioAsset: 'music/your_song.mp3',
+    coverAsset: 'music/cover.jpg',          // optional artwork
+    duration: Duration(minutes: 3, seconds: 45), // optional
+  ),
+
+Remember to only bundle music you're allowed to share.
+demo_melody.wav is a generated placeholder — delete it whenever.
