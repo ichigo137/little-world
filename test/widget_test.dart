@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:her_little_world/content.dart';
 import 'package:her_little_world/main.dart';
 
 void main() {
@@ -11,7 +12,7 @@ void main() {
     await tester.pump();
 
     // The gift screen should show the recipient's name.
-    expect(find.text('Put Her Name Here'), findsOneWidget);
+    expect(find.text(AppContent.herName), findsOneWidget);
 
     // The tagline should be visible.
     expect(find.text('a tiny world I built, just for you'), findsOneWidget);

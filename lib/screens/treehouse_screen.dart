@@ -37,7 +37,7 @@ class _TreehouseScreenState extends State<TreehouseScreen> {
       Offset(0.25, 0.7),
       Offset(0.68, 0.65),
     ];
-    return base.take(count).toList();
+    return List.generate(count, (i) => base[i % base.length]);
   }
 
   @override
