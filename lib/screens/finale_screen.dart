@@ -1,12 +1,18 @@
+import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:confetti/confetti.dart';
+import 'package:noise_meter/noise_meter.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../content.dart';
 import '../state/journey_state.dart';
 import '../theme/app_theme.dart';
 import '../widgets/animated_background.dart';
+import '../services/audio_manager.dart';
 import 'gift_screen.dart';
 import 'qr_screen.dart';
 
@@ -25,6 +31,14 @@ class _FinaleScreenState extends State<FinaleScreen>
   bool _blownOut = false;
   bool _showFinale = false;
 
+  StreamSubscription<NoiseReading>? _noiseSub;
+  bool _micOn = false;
+  double _micLevel = 0;
+  double _baseline = 60;
+  double _baselineSum = 0;
+  int _baselineSamples = 0;
+  int _blowStreak = 0;
+
   @override
   void initState() {
     super.initState();
@@ -41,6 +55,7 @@ class _FinaleScreenState extends State<FinaleScreen>
 
   @override
   void dispose() {
+    _stopMic();
     _flicker.dispose();
     _blowProgress.dispose();
     _confetti.dispose();
@@ -61,10 +76,88 @@ class _FinaleScreenState extends State<FinaleScreen>
 
   void _onBlowStatus(AnimationStatus status) {
     if (status == AnimationStatus.completed && !_blownOut) {
+      _stopMic();
       setState(() => _blownOut = true);
+      HapticFeedback.heavyImpact();
+      AudioManager.instance.play(Sfx.candle);
       _confetti.play();
       Future.delayed(const Duration(milliseconds: 1200), () {
         if (mounted) setState(() => _showFinale = true);
+      });
+    }
+  }
+
+  Future<void> _toggleMic() async {
+    if (_micOn) {
+      _stopMic();
+      return;
+    }
+    if (_blownOut) return;
+    var granted = await Permission.microphone.isGranted;
+    if (!granted) {
+      granted = await Permission.microphone.request().isGranted;
+    }
+    if (!mounted) return;
+    if (!granted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'mic isn\u2019t allowed here \u2014 hold the circle to blow instead',
+            style: GoogleFonts.comfortaa(fontSize: 13),
+          ),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: AppTheme.nightSoft,
+        ),
+      );
+      return;
+    }
+    _baselineSum = 0;
+    _baselineSamples = 0;
+    _blowStreak = 0;
+    setState(() {
+      _micOn = true;
+      _micLevel = 0;
+    });
+    _noiseSub = NoiseMeter().noise.listen(
+      _onNoise,
+      onError: (_) => _stopMic(),
+      cancelOnError: true,
+    );
+  }
+
+  void _onNoise(NoiseReading reading) {
+    final level = reading.meanDecibel;
+    if (_baselineSamples < 8) {
+      _baselineSum += level;
+      _baselineSamples++;
+      if (_baselineSamples == 8) {
+        _baseline = _baselineSum / _baselineSamples;
+      }
+      return;
+    }
+    final delta = level - _baseline;
+    if (delta > 14) {
+      _blowStreak++;
+    } else {
+      _blowStreak = 0;
+    }
+    if (!mounted) return;
+    setState(() {
+      _micLevel = (delta.clamp(0, 30) / 30).clamp(0.0, 1.0).toDouble();
+    });
+    if (_blowStreak >= 6) {
+      _startBlow();
+    }
+  }
+
+  void _stopMic() {
+    final sub = _noiseSub;
+    _noiseSub = null;
+    sub?.cancel();
+    if (mounted && _micOn) {
+      setState(() {
+        _micOn = false;
+        _micLevel = 0;
       });
     }
   }
@@ -183,6 +276,65 @@ class _FinaleScreenState extends State<FinaleScreen>
           style: GoogleFonts.comfortaa(
               fontSize: 12, color: AppTheme.textSoft), 
         ),
+        const SizedBox(height: 20),
+        GestureDetector(
+          onTap: _toggleMic,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: AppTheme.nightSoft.withValues(alpha: 0.6),
+              borderRadius: BorderRadius.circular(30),
+              border: Border.all(
+                color: AppTheme.lavender.withValues(alpha: 0.4),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AnimatedBuilder(
+                  animation: _flicker,
+                  builder: (context, child) {
+                    final pulse = 0.6 + _flicker.value * 0.4;
+                    final micOn = _micOn;
+                    return Opacity(
+                      opacity: micOn ? pulse : 0.8,
+                      child: child,
+                    );
+                  },
+                  child: Icon(
+                    _micOn
+                        ? Icons.mic_rounded
+                        : Icons.mic_none_rounded,
+                    size: 16,
+                    color: _micOn ? AppTheme.gold : AppTheme.textSoft,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  _micOn ? 'blow into the phone\u2026' : 'or use my voice',
+                  style: GoogleFonts.comfortaa(
+                    fontSize: 12,
+                    color: _micOn ? AppTheme.gold : AppTheme.textSoft,
+                  ),
+                ),
+                if (_micOn) ...[
+                  const SizedBox(width: 8),
+                  SizedBox(
+                    width: 48,
+                    child: LinearProgressIndicator(
+                      value: _micLevel,
+                      minHeight: 4,
+                      color: AppTheme.mint,
+                      backgroundColor: Colors.white.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -267,6 +419,15 @@ class _FinaleScreenState extends State<FinaleScreen>
             ),
             const SizedBox(height: 8),
             TextButton.icon(
+              onPressed: _openSpotify,
+              icon: const Icon(Icons.music_note_rounded, color: AppTheme.mint),
+              label: Text(
+                'the soundtrack of us',
+                style: GoogleFonts.comfortaa(color: AppTheme.textSoft),
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextButton.icon(
               onPressed: () {
                 context.read<JourneyState>().reset();
                 Navigator.of(context).pushAndRemoveUntil(
@@ -284,6 +445,27 @@ class _FinaleScreenState extends State<FinaleScreen>
         ),
       ),
     );
+  }
+
+  Future<void> _openSpotify() async {
+    final uri = Uri.parse(AppContent.spotifyPlaylistUrl);
+    try {
+      final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!ok && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'couldn\u2019t open Spotify from here',
+              style: GoogleFonts.comfortaa(),
+            ),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: AppTheme.nightSoft,
+          ),
+        );
+      }
+    } catch (_) {
+      // Ignore.
+    }
   }
 
   void _openSecret(BuildContext context) {

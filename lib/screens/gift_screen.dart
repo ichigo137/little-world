@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../content.dart';
 import '../theme/app_theme.dart';
 import '../widgets/animated_background.dart';
+import '../services/audio_manager.dart';
 import 'hub_screen.dart';
 
 class GiftScreen extends StatefulWidget {
@@ -40,6 +41,7 @@ class _GiftScreenState extends State<GiftScreen> with TickerProviderStateMixin {
   Future<void> _handleTap() async {
     if (_opening) return;
     setState(() => _opening = true);
+    AudioManager.instance.startAmbient();
     await _open.forward();
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
@@ -64,6 +66,7 @@ class _GiftScreenState extends State<GiftScreen> with TickerProviderStateMixin {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               GestureDetector(
+                key: const Key('gift_box'),
                 onTap: _handleTap,
                 child: AnimatedBuilder(
                   animation: Listenable.merge([_breathe, _open]),

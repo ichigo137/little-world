@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../content.dart';
 import '../state/journey_state.dart';
@@ -6,6 +7,7 @@ import '../theme/app_theme.dart';
 import '../widgets/animated_background.dart';
 import '../widgets/memory_reveal_card.dart';
 import '../widgets/section_header.dart';
+import '../services/audio_manager.dart';
 
 class TreehouseScreen extends StatefulWidget {
   const TreehouseScreen({super.key});
@@ -73,7 +75,11 @@ class _TreehouseScreenState extends State<TreehouseScreen> {
                                   top: pos.dy * constraints.maxHeight - 22,
                                   child: GestureDetector(
                                     onTap: () async {
-                                      if (!_lit[i]) setState(() => _lit[i] = true);
+                                      if (!_lit[i]) {
+                                        HapticFeedback.lightImpact();
+                                        setState(() => _lit[i] = true);
+                                        AudioManager.instance.play(Sfx.window);
+                                      }
                                       await showMemoryReveal(
                                         context,
                                         AppContent.treehouseMemories[i],

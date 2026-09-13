@@ -1,11 +1,11 @@
 {
-    "name": "her_little_world",
-    "short_name": "her_little_world",
+    "name": "For Mishtu",
+    "short_name": "For Mishtu",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#1B1533",
+    "theme_color": "#3A315C",
+    "description": "A tiny world built with love.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

@@ -60,6 +60,13 @@ class AppContent {
   static const String secretLinkUrl =
       'https://secret-site-for-birt.onrender.com';
 
+  // ---------------- THE PLAYLIST ----------------
+  // The "tracklist of us" — opens in the Spotify app / web player.
+  // Grab your playlist's share link and paste it here, e.g.
+  // 'https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M'
+  static const String spotifyPlaylistUrl =
+      'https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M';
+
   // ---------------- THE FINALE ----------------
   static const String finaleTitle = 'Happy Birthday';
 

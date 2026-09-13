@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../content.dart';
 import '../state/journey_state.dart';
@@ -6,6 +7,7 @@ import '../theme/app_theme.dart';
 import '../widgets/animated_background.dart';
 import '../widgets/memory_reveal_card.dart';
 import '../widgets/section_header.dart';
+import '../services/audio_manager.dart';
 
 class GardenScreen extends StatefulWidget {
   const GardenScreen({super.key});
@@ -57,7 +59,9 @@ class _GardenScreenState extends State<GardenScreen> {
                       colorSeed: index,
                       onTap: () async {
                         if (!_bloomed[index]) {
+                          HapticFeedback.mediumImpact();
                           setState(() => _bloomed[index] = true);
+                          AudioManager.instance.play(Sfx.bloom);
                         }
                         await showMemoryReveal(
                           context,

@@ -75,6 +75,7 @@ class HubScreen extends StatelessWidget {
                     color: const Color(0xFFE8B86D),
                     locked: !journey.allChaptersDone,
                     onTap: () => _go(context, const FinaleScreen()),
+                    onLockedTap: () => _showLockedHint(context),
                   ),
                 ],
               ),
@@ -85,6 +86,22 @@ class HubScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _showLockedHint(BuildContext context) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            'finish the Garden, Treehouse & Starry Hill first',
+            style: GoogleFonts.comfortaa(fontSize: 13),
+          ),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: AppTheme.nightSoft,
+          duration: const Duration(seconds: 2),
+        ),
+      );
   }
 
   void _go(BuildContext context, Widget screen) {

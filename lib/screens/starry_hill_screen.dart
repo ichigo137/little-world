@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../content.dart';
@@ -7,6 +8,7 @@ import '../state/journey_state.dart';
 import '../theme/app_theme.dart';
 import '../widgets/animated_background.dart';
 import '../widgets/section_header.dart';
+import '../services/audio_manager.dart';
 
 class StarryHillScreen extends StatefulWidget {
   const StarryHillScreen({super.key});
@@ -21,6 +23,7 @@ class _StarryHillScreenState extends State<StarryHillScreen>
   int _revealed = 0;
   bool _showMessage = false;
   late final AnimationController _shootController;
+  late final AnimationController _glow;
 
   @override
   void initState() {
@@ -29,11 +32,16 @@ class _StarryHillScreenState extends State<StarryHillScreen>
       vsync: this,
       duration: const Duration(milliseconds: 900),
     );
+    _glow = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    );
   }
 
   @override
   void dispose() {
     _shootController.dispose();
+    _glow.dispose();
     super.dispose();
   }
 
@@ -51,13 +59,18 @@ class _StarryHillScreenState extends State<StarryHillScreen>
   Future<void> _handleTap() async {
     if (_showMessage) return;
     if (_revealed < _heartPoints.length) {
+      HapticFeedback.selectionClick();
+      AudioManager.instance.play(Sfx.star);
       setState(() => _revealed++);
       if (_revealed == _heartPoints.length) {
+        HapticFeedback.heavyImpact();
+        AudioManager.instance.play(Sfx.complete);
         await Future.delayed(const Duration(milliseconds: 300));
         if (!mounted) return;
         await _shootController.forward(from: 0);
         if (!mounted) return;
         setState(() => _showMessage = true);
+        _glow.repeat(reverse: true);
         context.read<JourneyState>().completeStarryHill();
       }
     }
@@ -84,11 +97,17 @@ class _StarryHillScreenState extends State<StarryHillScreen>
                   child: Stack(
                     children: [
                       Positioned.fill(
-                        child: CustomPaint(
-                          painter: _ConstellationPainter(
-                            points: _heartPoints,
-                            revealed: _revealed,
-                          ),
+                        child: AnimatedBuilder(
+                          animation: _glow,
+                          builder: (context, child) {
+                            return CustomPaint(
+                              painter: _ConstellationPainter(
+                                points: _heartPoints,
+                                revealed: _revealed,
+                                pulse: _showMessage ? _glow.value : 0,
+                              ),
+                            );
+                          },
                         ),
                       ),
                       AnimatedBuilder(
@@ -147,7 +166,12 @@ class _StarryHillScreenState extends State<StarryHillScreen>
 class _ConstellationPainter extends CustomPainter {
   final List<Offset> points;
   final int revealed;
-  _ConstellationPainter({required this.points, required this.revealed});
+  final double pulse;
+  _ConstellationPainter({
+    required this.points,
+    required this.revealed,
+    this.pulse = 0,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -156,6 +180,7 @@ class _ConstellationPainter extends CustomPainter {
       ..strokeWidth = 1.5;
     final starPaint = Paint()..color = Colors.white;
     final glowPaint = Paint()..color = AppTheme.gold.withValues(alpha: 0.6);
+    final complete = revealed >= points.length && points.length > 1;
 
     Offset? prev;
     for (int i = 0; i < revealed && i < points.length; i++) {
@@ -163,15 +188,28 @@ class _ConstellationPainter extends CustomPainter {
       if (prev != null) {
         canvas.drawLine(prev, p, linePaint);
       }
+      if (complete && pulse > 0) {
+        final halo = Paint()
+          ..color = AppTheme.gold.withValues(alpha: 0.25 + pulse * 0.3);
+        canvas.drawCircle(p, 5 + pulse * 5, halo);
+      }
       canvas.drawCircle(p, 5, glowPaint);
       canvas.drawCircle(p, 3, starPaint);
       prev = p;
+    }
+
+    if (complete && prev != null) {
+      final first = Offset(
+        points.first.dx * size.width,
+        points.first.dy * size.height,
+      );
+      canvas.drawLine(prev, first, linePaint);
     }
   }
 
   @override
   bool shouldRepaint(covariant _ConstellationPainter oldDelegate) =>
-      oldDelegate.revealed != revealed;
+      oldDelegate.revealed != revealed || oldDelegate.pulse != pulse;
 }
 
 class _ShootingStarPainter extends CustomPainter {

@@ -1,9 +1,11 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 
 /// One tappable location on the world map. Bobs gently up and down
 /// forever, glows once completed, and dims with a lock icon while
-/// locked.
+/// locked. Tapping a locked node triggers a little shake and an
+/// optional hint via [onLockedTap].
 class HubNode extends StatefulWidget {
   final IconData icon;
   final String label;
@@ -11,6 +13,7 @@ class HubNode extends StatefulWidget {
   final bool locked;
   final bool done;
   final VoidCallback onTap;
+  final VoidCallback? onLockedTap;
   final double bobOffset;
 
   const HubNode({
@@ -19,6 +22,7 @@ class HubNode extends StatefulWidget {
     required this.label,
     required this.color,
     required this.onTap,
+    this.onLockedTap,
     this.locked = false,
     this.done = false,
     this.bobOffset = 0,
@@ -28,37 +32,57 @@ class HubNode extends StatefulWidget {
   State<HubNode> createState() => _HubNodeState();
 }
 
-class _HubNodeState extends State<HubNode> with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
+class _HubNodeState extends State<HubNode>
+    with TickerProviderStateMixin {
+  late final AnimationController _bob;
+  late final AnimationController _shake;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
+    _bob = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 3),
     )..repeat(reverse: true);
+    _shake = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _bob.dispose();
+    _shake.dispose();
     super.dispose();
+  }
+
+  void _handleTap() {
+    if (widget.locked) {
+      _shake.forward(from: 0);
+      widget.onLockedTap?.call();
+    } else {
+      widget.onTap();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: _controller,
+      animation: Listenable.merge([_bob, _shake]),
       builder: (context, child) {
-        final bob = (_controller.value - 0.5) * 12;
+        final bob = (_bob.value - 0.5) * 12;
+        final shakeT = _shake.value;
+        final shakeDx = _shake.isAnimating
+            ? math.sin(shakeT * math.pi * 6) * (1 - shakeT) * 10
+            : 0.0;
         return Transform.translate(
-          offset: Offset(0, bob + widget.bobOffset),
+          offset: Offset(shakeDx, bob + widget.bobOffset),
           child: child,
         );
       },
       child: GestureDetector(
-        onTap: widget.locked ? null : widget.onTap,
+        onTap: _handleTap,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
