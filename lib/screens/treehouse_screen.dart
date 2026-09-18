@@ -17,12 +17,13 @@ class TreehouseScreen extends StatefulWidget {
 }
 
 class _TreehouseScreenState extends State<TreehouseScreen> {
-  late final List<bool> _lit;
+  late List<bool> _lit;
 
   @override
   void initState() {
     super.initState();
-    _lit = List.filled(AppContent.treehouseMemories.length, false);
+    final journey = context.read<JourneyState>();
+    _lit = journey.getOrInitTreehouseLit(AppContent.treehouseMemories.length);
   }
 
   void _checkComplete() {
@@ -77,7 +78,8 @@ class _TreehouseScreenState extends State<TreehouseScreen> {
                                     onTap: () async {
                                       if (!_lit[i]) {
                                         HapticFeedback.lightImpact();
-                                        setState(() => _lit[i] = true);
+                                        context.read<JourneyState>().lightWindow(i);
+                                        setState(() {});
                                         AudioManager.instance.play(Sfx.window);
                                       }
                                       await showMemoryReveal(

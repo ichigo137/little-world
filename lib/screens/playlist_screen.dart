@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,7 @@ class PlaylistScreen extends StatefulWidget {
 class _PlaylistScreenState extends State<PlaylistScreen> {
   final AudioPlayer _player = AudioPlayer();
   final math.Random _random = math.Random();
+  final List<StreamSubscription<dynamic>> _subscriptions = [];
 
   int _index = 0;
   bool _playing = false;
@@ -34,21 +36,21 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
   @override
   void initState() {
     super.initState();
-    _player.onPlayerStateChanged.listen((state) {
+    _subscriptions.add(_player.onPlayerStateChanged.listen((state) {
       if (!mounted) return;
       setState(() => _playing = state == PlayerState.playing);
-    });
-    _player.onPositionChanged.listen((pos) {
+    }));
+    _subscriptions.add(_player.onPositionChanged.listen((pos) {
       if (!mounted) return;
       setState(() => _position = pos);
-    });
-    _player.onDurationChanged.listen((d) {
+    }));
+    _subscriptions.add(_player.onDurationChanged.listen((d) {
       if (!mounted) return;
       setState(() => _duration = d);
-    });
-    _player.onPlayerComplete.listen((_) {
+    }));
+    _subscriptions.add(_player.onPlayerComplete.listen((_) {
       if (mounted) _next(autoSkip: true);
-    });
+    }));
     if (_tracks.isNotEmpty) {
       _load(0);
     }
@@ -56,6 +58,10 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
 
   @override
   void dispose() {
+    for (final sub in _subscriptions) {
+      sub.cancel();
+    }
+    _subscriptions.clear();
     _player.dispose();
     super.dispose();
   }
@@ -413,7 +419,7 @@ class _PlayerBar extends StatelessWidget {
                   child: Slider(
                     value: value,
                     max: maxMs.toDouble(),
-                    onChanged: (_) {},
+                    onChanged: (v) => onSeek(v.round()),
                     onChangeEnd: (v) => onSeek(v.round()),
                   ),
                 ),
@@ -609,7 +615,7 @@ class _VinylPainter extends CustomPainter {
 
     // Sheen wedge.
     const pi = math.pi;
-      canvas.drawArc(
+    canvas.drawArc(
       Rect.fromCircle(center: c, radius: r * 0.98),
       -pi * 0.85,
       pi * 0.55,

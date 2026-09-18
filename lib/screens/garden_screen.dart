@@ -19,7 +19,7 @@ class GardenScreen extends StatefulWidget {
 
 class _GardenScreenState extends State<GardenScreen>
     with TickerProviderStateMixin {
-  late final List<bool> _bloomed;
+  late List<bool> _bloomed;
   late final AnimationController _world; // drives petals & butterflies
   late final List<_PetalSpec> _petals;
   late final List<_ButterflySpec> _butterflies;
@@ -27,7 +27,8 @@ class _GardenScreenState extends State<GardenScreen>
   @override
   void initState() {
     super.initState();
-    _bloomed = List.filled(AppContent.gardenMemories.length, false);
+    final journey = context.read<JourneyState>();
+    _bloomed = journey.getOrInitGardenBloomed(AppContent.gardenMemories.length);
     _world = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 30),
@@ -109,7 +110,8 @@ class _GardenScreenState extends State<GardenScreen>
                           onTap: () async {
                             if (!_bloomed[index]) {
                               HapticFeedback.mediumImpact();
-                              setState(() => _bloomed[index] = true);
+                              context.read<JourneyState>().bloomFlower(index);
+                              setState(() {});
                               AudioManager.instance.play(Sfx.bloom);
                             }
                             await showMemoryReveal(

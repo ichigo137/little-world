@@ -42,6 +42,16 @@ class AudioManager {
       // Ignore.
     }
   }
+
+  Future<void> dispose() async {
+    _ambientStarted = false;
+    try {
+      await _sfx.dispose();
+      await _ambient.dispose();
+    } catch (_) {
+      // Ignore.
+    }
+  }
 }
 
 /// Convenience names so screens read nicely.
