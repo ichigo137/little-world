@@ -27,6 +27,8 @@ class _FinaleScreenState extends State<FinaleScreen>
     with TickerProviderStateMixin {
   late final AnimationController _flicker;
   late final AnimationController _blowProgress;
+  late final AnimationController _smoke; // drives the candle smoke wisp
+  late final AnimationController _shimmer; // title shimmer sweep
   late final ConfettiController _confetti;
   bool _blownOut = false;
   bool _showFinale = false;
@@ -50,6 +52,14 @@ class _FinaleScreenState extends State<FinaleScreen>
       vsync: this,
       duration: const Duration(milliseconds: 1600),
     )..addStatusListener(_onBlowStatus);
+    _smoke = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 4),
+    );
+    _shimmer = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2600),
+    );
     _confetti = ConfettiController(duration: const Duration(seconds: 3));
   }
 
@@ -58,6 +68,8 @@ class _FinaleScreenState extends State<FinaleScreen>
     _stopMic();
     _flicker.dispose();
     _blowProgress.dispose();
+    _smoke.dispose();
+    _shimmer.dispose();
     _confetti.dispose();
     super.dispose();
   }
@@ -81,8 +93,12 @@ class _FinaleScreenState extends State<FinaleScreen>
       HapticFeedback.heavyImpact();
       AudioManager.instance.play(Sfx.candle);
       _confetti.play();
+      _smoke.repeat();
       Future.delayed(const Duration(milliseconds: 1200), () {
-        if (mounted) setState(() => _showFinale = true);
+        if (mounted) {
+          setState(() => _showFinale = true);
+          _shimmer.repeat();
+        }
       });
     }
   }
@@ -214,7 +230,7 @@ class _FinaleScreenState extends State<FinaleScreen>
         ),
         const SizedBox(height: 24),
         AnimatedBuilder(
-          animation: Listenable.merge([_flicker, _blowProgress]),
+          animation: Listenable.merge([_flicker, _blowProgress, _smoke]),
           builder: (context, child) {
             final flameHeight = _blownOut
                 ? 0.0
@@ -223,7 +239,10 @@ class _FinaleScreenState extends State<FinaleScreen>
               width: 60,
               height: 140,
               child: CustomPaint(
-                  painter: _CandlePainter(flameHeight: flameHeight)),
+                  painter: _CandlePainter(
+                flameHeight: flameHeight,
+                smokeTime: _blownOut ? _smoke.value * 4 : 0,
+              )),
             );
           },
         ),
@@ -348,10 +367,24 @@ class _FinaleScreenState extends State<FinaleScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            ShaderMask(
-              shaderCallback: (bounds) => const LinearGradient(
-                colors: [AppTheme.gold, Color(0xFFEF9FBF)],
-              ).createShader(bounds),
+            // Gold title with a slow shimmer band sweeping across it.
+            AnimatedBuilder(
+              animation: _shimmer,
+              builder: (context, child) => ShaderMask(
+                shaderCallback: (bounds) {
+                  final t = _shimmer.value;
+                  return LinearGradient(
+                    begin: Alignment(-1.6 + 3.2 * t, 0),
+                    end: Alignment(-0.6 + 3.2 * t, 0),
+                    colors: const [
+                      Color(0xFFE8B86D),
+                      Colors.white,
+                      Color(0xFFEF9FBF),
+                    ],
+                  ).createShader(bounds);
+                },
+                child: child,
+              ),
               child: Text(
                 AppContent.finaleTitle,
                 style: GoogleFonts.caveat(
@@ -497,9 +530,13 @@ class _FinaleScreenState extends State<FinaleScreen>
     ];
     return List.generate(6, (i) {
       return _Balloon(
-          color: colors[i % colors.length],
-          delay: i * 300,
-          xFraction: 0.1 + i * 0.15);
+        color: colors[i % colors.length],
+        delay: i * 300,
+        xFraction: 0.08 + i * 0.15,
+        wobbleHz: 0.8 + (i % 3) * 0.25,
+        wobbleAmp: 10 + (i % 4) * 5.0,
+        tilt: (i % 2 == 0 ? -1 : 1) * 0.06 * (1 + (i % 3)),
+      );
     });
   }
 }
@@ -508,8 +545,17 @@ class _Balloon extends StatefulWidget {
   final Color color;
   final int delay;
   final double xFraction;
-  const _Balloon(
-      {required this.color, required this.delay, required this.xFraction});
+  final double wobbleHz;
+  final double wobbleAmp;
+  final double tilt;
+  const _Balloon({
+    required this.color,
+    required this.delay,
+    required this.xFraction,
+    this.wobbleHz = 1.2,
+    this.wobbleAmp = 14,
+    this.tilt = 0,
+  });
 
   @override
   State<_Balloon> createState() => _BalloonState();
@@ -522,8 +568,10 @@ class _BalloonState extends State<_Balloon>
   @override
   void initState() {
     super.initState();
-    _controller =
-        AnimationController(vsync: this, duration: const Duration(seconds: 5));
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 6),
+    );
     Future.delayed(Duration(milliseconds: widget.delay), () {
       if (mounted) _controller.forward();
     });
@@ -542,34 +590,112 @@ class _BalloonState extends State<_Balloon>
       animation: _controller,
       builder: (context, child) {
         final t = _controller.value;
-        final y = size.height * (1.1 - t * 1.3);
-        final sway = sin(t * 6) * 14;
-        final opacity = (1 - t) < 0.15 ? 0.0 : 1.0;
+        // Ease-out rise: quick lift-off, then a gentle coast.
+        final rise = Curves.easeOutCubic.transform(t);
+        final y = size.height * (1.15 - rise * 1.4);
+        final wobble = sin(t * widget.wobbleHz * 2 * pi) * widget.wobbleAmp;
+        final tilt = widget.tilt + sin(t * widget.wobbleHz * pi) * 0.08;
+        final opacity = rise > 0.92 ? (1 - rise) / 0.08 : 1.0;
         return Positioned(
-          left: size.width * widget.xFraction + sway,
+          left: size.width * widget.xFraction + wobble,
           top: y,
-          child: Opacity(opacity: opacity, child: child),
+          child: Opacity(
+            opacity: opacity.clamp(0.0, 1.0),
+            child: Transform.rotate(
+              angle: tilt,
+              child: SizedBox(
+                width: 60,
+                height: 110,
+                child: CustomPaint(
+                    painter: _BalloonPainter(color: widget.color)),
+              ),
+            ),
+          ),
         );
       },
-      child: Column(
-        children: [
-          Container(
-            width: 34,
-            height: 42,
-            decoration: BoxDecoration(
-                color: widget.color, borderRadius: BorderRadius.circular(20)),
-          ),
-          Container(
-              width: 1.5, height: 30, color: widget.color.withValues(alpha: 0.5)),
-        ],
-      ),
     );
   }
 }
 
+/// A glossy balloon: teardrop body, soft shading, shine highlight,
+/// knot and a gently curving string.
+class _BalloonPainter extends CustomPainter {
+  final Color color;
+  _BalloonPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final body = Rect.fromLTWH(w * 0.14, 0, w * 0.72, w * 0.86);
+
+    final bodyPath = Path()
+      ..moveTo(w / 2, body.bottom)
+      ..cubicTo(
+        body.left - w * 0.06,
+        body.bottom - body.height * 0.42,
+        body.left,
+        body.top + body.height * 0.18,
+        w / 2,
+        body.top,
+      )
+      ..cubicTo(
+        body.right,
+        body.top + body.height * 0.18,
+        body.right + w * 0.06,
+        body.bottom - body.height * 0.42,
+        w / 2,
+        body.bottom,
+      )
+      ..close();
+
+    canvas.drawPath(bodyPath, Paint()..color = color);
+    canvas.drawPath(
+      bodyPath,
+      Paint()
+        ..color = Colors.black.withValues(alpha: 0.12)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
+    );
+
+    // knot
+    canvas.drawOval(
+      Rect.fromCenter(
+          center: Offset(w / 2, body.bottom + 4), width: 9, height: 8),
+      Paint()..color = color,
+    );
+
+    // shine highlight
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset(
+            body.left + body.width * 0.30, body.top + body.height * 0.30),
+        width: body.width * 0.24,
+        height: body.height * 0.34,
+      ),
+      Paint()..color = Colors.white.withValues(alpha: 0.45),
+    );
+
+    // curving string
+    final stringPath = Path()
+      ..moveTo(w / 2, body.bottom + 8)
+      ..quadraticBezierTo(w * 0.36, body.bottom + 30, w / 2, body.bottom + 48);
+    canvas.drawPath(
+      stringPath,
+      Paint()
+        ..color = color.withValues(alpha: 0.55)
+        ..strokeWidth = 1.5
+        ..style = PaintingStyle.stroke,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _BalloonPainter oldDelegate) =>
+      oldDelegate.color != color;
+}
+
 class _CandlePainter extends CustomPainter {
   final double flameHeight;
-  _CandlePainter({required this.flameHeight});
+  final double smokeTime; // seconds since blowout, 0 while lit
+  _CandlePainter({required this.flameHeight, this.smokeTime = 0});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -578,6 +704,7 @@ class _CandlePainter extends CustomPainter {
       ..color = const Color(0xFFCFC4E8)
       ..strokeWidth = 2;
     final baseY = size.height - 20;
+    final wickTip = Offset(size.width * 0.5, size.height * 0.3 - 10);
 
     canvas.drawRRect(
       RRect.fromRectAndRadius(
@@ -589,20 +716,37 @@ class _CandlePainter extends CustomPainter {
     );
     canvas.drawLine(
       Offset(size.width * 0.5, size.height * 0.3),
-      Offset(size.width * 0.5, size.height * 0.3 - 10),
+      wickTip,
       wickPaint,
     );
 
     if (flameHeight > 1) {
-      final flameBaseY = size.height * 0.3 - 10;
+      // Soft warm halo around the flame.
+      canvas.drawCircle(
+        Offset(size.width * 0.5, wickTip.dy - flameHeight * 0.4),
+        26,
+        Paint()
+          ..blendMode = BlendMode.plus
+          ..shader = RadialGradient(
+            colors: [
+              const Color(0xFFF6C066).withValues(alpha: 0.30),
+              const Color(0xFFF6C066).withValues(alpha: 0),
+            ],
+          ).createShader(Rect.fromCircle(
+            center: Offset(size.width * 0.5, wickTip.dy - flameHeight * 0.4),
+            radius: 26,
+          )),
+      );
+
+      final flameBaseY = wickTip.dy;
       final flameTop = Offset(size.width * 0.5, flameBaseY - flameHeight);
       final flamePaint = Paint()
         ..shader = const LinearGradient(
           begin: Alignment.bottomCenter,
           end: Alignment.topCenter,
           colors: [Color(0xFFF6C066), Color(0xFFEF9FBF)],
-        ).createShader(
-            Rect.fromLTWH(size.width * 0.5 - 10, flameTop.dy, 20, flameHeight));
+        ).createShader(Rect.fromLTWH(
+            size.width * 0.5 - 10, flameTop.dy, 20, flameHeight));
       final path = Path()
         ..moveTo(size.width * 0.5, flameBaseY)
         ..quadraticBezierTo(size.width * 0.5 - 10,
@@ -611,10 +755,57 @@ class _CandlePainter extends CustomPainter {
             flameBaseY - flameHeight * 0.5, size.width * 0.5, flameBaseY)
         ..close();
       canvas.drawPath(path, flamePaint);
+    } else if (smokeTime > 0) {
+      // Ember glow on the wick, fading out over ~1.2s.
+      final emberAlpha = (1 - smokeTime / 1.2).clamp(0.0, 1.0);
+      if (emberAlpha > 0) {
+        canvas.drawCircle(
+          wickTip,
+          3 + emberAlpha * 2,
+          Paint()
+            ..blendMode = BlendMode.plus
+            ..color = const Color(0xFFFFB36B).withValues(alpha: emberAlpha * 0.7),
+        );
+      }
+
+      // A curling smoke wisp: recycled puffs rising, drifting and
+      // widening as they go.
+      final puffPaint = Paint()..color = Colors.white;
+      for (int i = 0; i < 12; i++) {
+        final t = (smokeTime * 0.45 + i / 12) % 1.0;
+        final x = wickTip.dx +
+            sin(t * 4.5 + i * 1.7) * 9 * t + // curl
+            t * 5; // gentle sideways drift
+        final y = wickTip.dy - t * 62;
+        final alpha = (1 - t) * 0.30 * min(1.0, t * 8);
+        puffPaint.color = Colors.white.withValues(alpha: alpha.clamp(0.0, 1.0));
+        canvas.drawCircle(Offset(x, y), 1.8 + t * 4.5, puffPaint);
+      }
+
+      // A few ember sparks float up for the first couple of seconds.
+      final sparkBase = (1 - smokeTime / 2.5).clamp(0.0, 1.0);
+      if (sparkBase > 0) {
+        for (int i = 0; i < 5; i++) {
+          final t = (smokeTime * 0.7 + i / 5) % 1.0;
+          final x = wickTip.dx + sin(t * 7 + i * 2.4) * 6;
+          final y = wickTip.dy - t * 40;
+          final flicker = (sin(smokeTime * 20 + i * 3) + 1) / 2;
+          final paint = Paint()
+            ..blendMode = BlendMode.plus
+            ..color = Color.lerp(
+                  const Color(0xFFF6C066),
+                  const Color(0xFFE8846C),
+                  (i % 3) / 2,
+                )!
+                .withValues(alpha: sparkBase * (1 - t) * (0.4 + flicker * 0.6));
+          canvas.drawCircle(Offset(x, y), 1.1 + (i % 2) * 0.7, paint);
+        }
+      }
     }
   }
 
   @override
   bool shouldRepaint(covariant _CandlePainter oldDelegate) =>
-      oldDelegate.flameHeight != flameHeight;
+      oldDelegate.flameHeight != flameHeight ||
+      oldDelegate.smokeTime != smokeTime;
 }

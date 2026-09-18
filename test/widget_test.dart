@@ -93,7 +93,7 @@ void main() {
       );
       await tester.pump();
 
-      await tester.tap(find.byIcon(Icons.eco_rounded).first);
+      await tester.tap(find.byKey(const ValueKey('flower_0')));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 600));
 

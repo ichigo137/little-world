@@ -203,7 +203,7 @@ class _NowPlayingHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(24, 8, 24, 18),
       child: Row(
         children: [
-          _Artwork(track: track, size: 96),
+          _Artwork(track: track, size: 96, playing: playing),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -496,76 +496,226 @@ class _PlayerBar extends StatelessWidget {
   }
 }
 
-class _Artwork extends StatelessWidget {
+class _Artwork extends StatefulWidget {
   final PlaylistTrack track;
   final double size;
+  final bool playing;
 
-  const _Artwork({required this.track, required this.size});
+  const _Artwork({
+    required this.track,
+    required this.size,
+    this.playing = false,
+  });
+
+  @override
+  State<_Artwork> createState() => _ArtworkState();
+}
+
+/// Real cover art stays still; the placeholder turns into a slowly
+/// spinning vinyl record while the track plays.
+class _ArtworkState extends State<_Artwork>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _spin;
+
+  @override
+  void initState() {
+    super.initState();
+    _spin = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 5),
+    );
+    if (widget.playing) _spin.repeat();
+  }
+
+  @override
+  void didUpdateWidget(covariant _Artwork oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.playing && !_spin.isAnimating) {
+      _spin.repeat();
+    } else if (!widget.playing && _spin.isAnimating) {
+      _spin.stop();
+    }
+  }
+
+  @override
+  void dispose() {
+    _spin.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (track.coverAsset != null) {
+    if (widget.track.coverAsset != null) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(14),
         child: Image.asset(
-          track.coverAsset!,
-          width: size,
-          height: size,
+          widget.track.coverAsset!,
+          width: widget.size,
+          height: widget.size,
           fit: BoxFit.cover,
-          errorBuilder: (c, e, s) => _placeholder(context),
+          errorBuilder: (c, e, s) => _vinyl(context),
         ),
       );
     }
-    return _placeholder(context);
+    return _vinyl(context);
   }
 
-  Widget _placeholder(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [AppTheme.lavender, AppTheme.gold],
+  Widget _vinyl(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(14),
+      child: AnimatedBuilder(
+        animation: _spin,
+        builder: (context, child) => Transform.rotate(
+          angle: _spin.value * 2 * math.pi,
+          child: child,
         ),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Icon(
-        Icons.music_note_rounded,
-        size: size * 0.45,
-        color: AppTheme.textDark,
+        child: SizedBox(
+          width: widget.size,
+          height: widget.size,
+          child: const CustomPaint(painter: _VinylPainter()),
+        ),
       ),
     );
   }
 }
 
-class _Equalizer extends StatelessWidget {
+/// A dreamy pastel record: gradient wax, grooves, a rotating sheen
+/// wedge and a soft center label.
+class _VinylPainter extends CustomPainter {
+  const _VinylPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final c = Offset(size.width / 2, size.height / 2);
+    final r = size.width / 2;
+
+    canvas.drawCircle(
+      c,
+      r,
+      Paint()
+        ..shader = const RadialGradient(
+          colors: [AppTheme.lavender, AppTheme.gold],
+        ).createShader(Rect.fromCircle(center: c, radius: r)),
+    );
+
+    // Grooves.
+    final groove = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+    for (final gr in const [0.88, 0.76, 0.64, 0.52]) {
+      groove.color = Colors.black.withValues(alpha: 0.10);
+      canvas.drawCircle(c, r * gr, groove);
+    }
+
+    // Sheen wedge.
+    const pi = math.pi;
+      canvas.drawArc(
+      Rect.fromCircle(center: c, radius: r * 0.98),
+      -pi * 0.85,
+      pi * 0.55,
+      true,
+      Paint()..color = Colors.white.withValues(alpha: 0.16),
+    );
+
+    // Center label + hole.
+    canvas.drawCircle(
+      c,
+      r * 0.36,
+      Paint()..color = AppTheme.nightSoft.withValues(alpha: 0.95),
+    );
+    canvas.drawCircle(
+      c,
+      r * 0.07,
+      Paint()..color = AppTheme.nightDeep,
+    );
+
+    // A little vector note on the label (no font dependency).
+    final notePaint = Paint()..color = AppTheme.textLight;
+    final head = Offset(c.dx - r * 0.04, c.dy + r * 0.11);
+    canvas.drawCircle(head, r * 0.085, notePaint);
+    canvas.drawRect(
+      Rect.fromLTWH(head.dx + r * 0.06, c.dy - r * 0.20, r * 0.035, r * 0.30),
+      notePaint,
+    );
+    canvas.drawPath(
+      Path()
+        ..moveTo(head.dx + r * 0.06, c.dy - r * 0.20)
+        ..quadraticBezierTo(
+            c.dx + r * 0.16, c.dy - r * 0.16, c.dx + r * 0.12, c.dy - r * 0.04),
+      notePaint..style = PaintingStyle.stroke..strokeWidth = r * 0.03,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _VinylPainter oldDelegate) => false;
+}
+
+class _Equalizer extends StatefulWidget {
   final bool tall;
 
   const _Equalizer({this.tall = false});
 
   @override
+  State<_Equalizer> createState() => _EqualizerState();
+}
+
+/// Three little bars bouncing out of phase, like a real now-playing
+/// indicator.
+class _EqualizerState extends State<_Equalizer>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _c;
+
+  @override
+  void initState() {
+    super.initState();
+    _c = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     const color = AppTheme.mint;
+    final maxH = widget.tall ? 18.0 : 14.0;
+    const base = [0.5, 1.0, 0.7];
     return SizedBox(
       width: 20,
-      height: tall ? 20 : 16,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          for (final h in [0.5, 1.0, 0.7])
-            Container(
-              width: 3,
-              height: 16 * h,
-              margin: const EdgeInsets.symmetric(horizontal: 1),
-              decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-        ],
+      height: widget.tall ? 20 : 16,
+      child: AnimatedBuilder(
+        animation: _c,
+        builder: (context, _) {
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              for (var i = 0; i < base.length; i++)
+                Container(
+                  width: 3,
+                  height: maxH *
+                      base[i] *
+                      (0.45 +
+                          0.55 *
+                              (0.5 +
+                                  0.5 *
+                                      math.sin(_c.value * 2 * math.pi *
+                                              (1.0 + i * 0.35) +
+                                          i * 1.1))),
+                  margin: const EdgeInsets.symmetric(horizontal: 1),
+                  decoration: BoxDecoration(
+                    color: color,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+            ],
+          );
+        },
       ),
     );
   }

@@ -10,6 +10,48 @@ import '../widgets/section_header.dart';
 /// The last little surprise: a scannable QR code hiding the live
 /// secret site. Tapping the code or the button opens it in her
 /// browser. Same soft pastel world as everywhere else.
+
+/// A slow diagonal sheen that sweeps across the QR card like light
+/// passing over glass.
+class _CardSheenPainter extends CustomPainter {
+  final double progress; // 0..1, one sweep
+  _CardSheenPainter({required this.progress});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // The band crosses the card during the middle 40% of the cycle.
+    final t = ((progress - 0.3) / 0.4).clamp(0.0, 1.0);
+    if (t <= 0 || t >= 1) return;
+    final x = -size.width * 0.6 + t * size.width * 2.2;
+    final rect = Offset.zero & size;
+    canvas.save();
+    canvas.clipRRect(
+      RRect.fromRectAndRadius(rect, const Radius.circular(22)),
+    );
+    canvas.drawRect(
+      rect,
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.white.withValues(alpha: 0),
+            Colors.white.withValues(alpha: 0.28),
+            Colors.white.withValues(alpha: 0),
+          ],
+          stops: const [0.35, 0.5, 0.65],
+        ).createShader(
+          Rect.fromLTWH(x - size.width * 0.5, 0, size.width, size.height),
+        ),
+    );
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant _CardSheenPainter oldDelegate) =>
+      oldDelegate.progress != progress;
+}
+
 class QrScreen extends StatefulWidget {
   const QrScreen({super.key});
 
@@ -20,6 +62,7 @@ class QrScreen extends StatefulWidget {
 class _QrScreenState extends State<QrScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _hint;
+  late final AnimationController _shimmer;
   bool _opening = false;
 
   @override
@@ -29,11 +72,16 @@ class _QrScreenState extends State<QrScreen>
       vsync: this,
       duration: const Duration(seconds: 2),
     )..repeat(reverse: true);
+    _shimmer = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2800),
+    )..repeat();
   }
 
   @override
   void dispose() {
     _hint.dispose();
+    _shimmer.dispose();
     super.dispose();
   }
 
@@ -104,7 +152,15 @@ class _QrScreenState extends State<QrScreen>
                               onTap: _openLink,
                               child: Transform.rotate(
                                 angle: -0.015,
-                                child: Container(
+                                child: AnimatedBuilder(
+                                  animation: _shimmer,
+                                  builder: (context, child) => CustomPaint(
+                                    foregroundPainter: _CardSheenPainter(
+                                      progress: _shimmer.value,
+                                    ),
+                                    child: child,
+                                  ),
+                                  child: Container(
                                   width: 300,
                                   padding:
                                       const EdgeInsets.fromLTRB(20, 24, 20, 20),
@@ -179,6 +235,7 @@ class _QrScreenState extends State<QrScreen>
                                       ),
                                     ],
                                   ),
+                                ),
                                 ),
                               ),
                             ),
