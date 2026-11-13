@@ -360,6 +360,7 @@ class _Flower extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: TweenAnimationBuilder<double>(
         tween: Tween(begin: 0, end: bloomed ? 1 : 0),
@@ -388,8 +389,8 @@ class _FlowerPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final cx = size.width / 2;
-    final baseY = size.height - 4;
-    final bloomY = size.height * 0.30;
+    final baseY = size.height - 12;
+    final bloomY = size.height * 0.28;
 
     final stemPaint = Paint()
       ..color = const Color(0xFF7FA97C)
@@ -397,8 +398,11 @@ class _FlowerPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
 
+    // Stem height is positive: from baseY at the bottom up to bloomY at the top.
+    final maxStemH = baseY - bloomY;
+    final growH = maxStemH * growth;
+
     // Stem grows with progress, with a gentle S-curve.
-    final growH = (bloomY - baseY) * growth;
     if (growH > 2) {
       final path = Path()
         ..moveTo(cx, baseY)
@@ -435,21 +439,21 @@ class _FlowerPainter extends CustomPainter {
         ..strokeWidth = 2.5
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke;
-      canvas.drawLine(Offset(cx, baseY), Offset(cx, baseY - 12), sproutStem);
+      canvas.drawLine(Offset(cx, baseY), Offset(cx, baseY - 14), sproutStem);
 
       // Two tiny seedling leaves
-      _drawLeaf(canvas, Offset(cx - 1, baseY - 6), -2.2, 7);
-      _drawLeaf(canvas, Offset(cx + 1, baseY - 8), 2.2 - pi, 7);
+      _drawLeaf(canvas, Offset(cx - 1, baseY - 7), -2.2, 7);
+      _drawLeaf(canvas, Offset(cx + 1, baseY - 9), 2.2 - pi, 7);
 
       // Soft colored flower bud waiting to bloom
       final budColor = color.withValues(alpha: 0.85);
       canvas.drawCircle(
-        Offset(cx, baseY - 14),
+        Offset(cx, baseY - 16),
         8,
         Paint()..color = color.withValues(alpha: 0.25),
       );
       canvas.drawCircle(
-        Offset(cx, baseY - 14),
+        Offset(cx, baseY - 16),
         4.5,
         Paint()..color = budColor,
       );
