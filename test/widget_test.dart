@@ -8,7 +8,12 @@ import 'package:her_little_world/main.dart';
 import 'package:her_little_world/screens/garden_screen.dart';
 import 'package:her_little_world/screens/hub_screen.dart';
 import 'package:her_little_world/screens/playlist_screen.dart';
+import 'package:her_little_world/screens/treehouse_screen.dart';
+import 'package:her_little_world/screens/starry_hill_screen.dart';
+import 'package:her_little_world/screens/finale_screen.dart';
+import 'package:her_little_world/widgets/media_access_gate.dart';
 import 'package:her_little_world/state/journey_state.dart';
+import 'package:her_little_world/services/media_catalog.dart';
 
 void main() {
   setUp(() {
@@ -40,8 +45,11 @@ void main() {
   });
 
   group('Hub', () {
-    Widget hubApp(JourneyState state) => ChangeNotifierProvider.value(
-          value: state,
+    Widget hubApp(JourneyState state) => MultiProvider(
+          providers: [
+            ChangeNotifierProvider.value(value: state),
+            ChangeNotifierProvider(create: (_) => MediaCatalog()),
+          ],
           child: const MaterialApp(home: HubScreen()),
         );
 
@@ -86,8 +94,11 @@ void main() {
     testWidgets('tapping a flower reveals its memory card',
         (WidgetTester tester) async {
       await tester.pumpWidget(
-        ChangeNotifierProvider.value(
-          value: JourneyState(),
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (_) => JourneyState()),
+            ChangeNotifierProvider(create: (_) => MediaCatalog()),
+          ],
           child: const MaterialApp(home: GardenScreen()),
         ),
       );
@@ -107,7 +118,12 @@ void main() {
   group('Playlist', () {
     testWidgets('renders the in-app player with the bundled tracks',
         (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(home: PlaylistScreen()));
+      await tester.pumpWidget(
+        ChangeNotifierProvider(
+          create: (_) => MediaCatalog(),
+          child: const MaterialApp(home: PlaylistScreen()),
+        ),
+      );
       await tester.pump();
 
       expect(find.text('the soundtrack of us'), findsOneWidget);
@@ -157,6 +173,137 @@ void main() {
       final fresh = JourneyState();
       await Future<void>.delayed(const Duration(milliseconds: 20));
       expect(fresh.allChaptersDone, isFalse);
+    });
+  });
+
+  group('Treehouse', () {
+    testWidgets('lights windows and reveals memory card',
+        (WidgetTester tester) async {
+      final journey = JourneyState();
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider.value(value: journey),
+            ChangeNotifierProvider(create: (_) => MediaCatalog()),
+          ],
+          child: const MaterialApp(home: TreehouseScreen()),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.text('The Treehouse'), findsOneWidget);
+      expect(find.text('0 / 5 lit'), findsOneWidget);
+
+      final windowFinder = find.byKey(const ValueKey('window_0'));
+      expect(windowFinder, findsOneWidget);
+
+      await tester.tap(windowFinder);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 600));
+
+      expect(journey.getOrInitTreehouseLit(5)[0], isTrue);
+    });
+  });
+
+  group('Starry Hill', () {
+    testWidgets('16-tap constellation reveal completes chapter',
+        (WidgetTester tester) async {
+      final journey = JourneyState();
+      await tester.pumpWidget(
+        ChangeNotifierProvider.value(
+          value: journey,
+          child: const MaterialApp(home: StarryHillScreen()),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.text('Starry Hill'), findsOneWidget);
+      expect(find.text(AppContent.constellationMessage), findsNothing);
+
+      for (int i = 0; i < 16; i++) {
+        await tester.tap(find.byKey(const Key('starry_hill_tap')));
+        await tester.pump(const Duration(milliseconds: 50));
+      }
+
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 1000));
+
+      expect(journey.starryHillVisited, isTrue);
+      expect(find.text(AppContent.constellationMessage), findsOneWidget);
+    });
+  });
+
+  group('Finale', () {
+    testWidgets('blows candle on long press and reveals celebration',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        ChangeNotifierProvider(
+          create: (_) => JourneyState(),
+          child: const MaterialApp(home: FinaleScreen()),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.text('Make a wish...'), findsOneWidget);
+
+      final candleFinder = find.byKey(const Key('candle_gesture'));
+      expect(candleFinder, findsOneWidget);
+
+      final gesture = await tester.startGesture(tester.getCenter(candleFinder));
+      // Trigger onLongPressStart
+      await tester.pump(const Duration(milliseconds: 600));
+      // Advance past the 1600ms blow duration
+      for (int i = 0; i < 20; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      await gesture.up();
+      await tester.pump();
+
+      // Allow the 1200ms delay to finish and trigger _showFinale = true
+      for (int i = 0; i < 15; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+
+      expect(find.text(AppContent.finaleTitle), findsOneWidget);
+      expect(find.text(AppContent.herName), findsOneWidget);
+    });
+  });
+
+  group('MediaAccessGate', () {
+    testWidgets('renders child directly when remote is disabled',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        ChangeNotifierProvider(
+          create: (_) => MediaCatalog(),
+          child: const MaterialApp(
+            home: MediaAccessGate(
+              child: Text('Protected Content'),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.text('Protected Content'), findsOneWidget);
+    });
+
+    testWidgets('bypassing gate renders child', (WidgetTester tester) async {
+      final catalog = MediaCatalog();
+      catalog.continueWithoutCloud();
+
+      await tester.pumpWidget(
+        ChangeNotifierProvider.value(
+          value: catalog,
+          child: const MaterialApp(
+            home: MediaAccessGate(
+              child: Text('Protected Content'),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.text('Protected Content'), findsOneWidget);
     });
   });
 }

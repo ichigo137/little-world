@@ -2,21 +2,36 @@
 class MemoryItem {
   final String message;
   final String? photoAsset;
-  const MemoryItem({required this.message, this.photoAsset});
+  final String? photoUrl;
+  final Map<String, String> photoHeaders;
+  const MemoryItem({
+    required this.message,
+    this.photoAsset,
+    this.photoUrl,
+    this.photoHeaders = const {},
+  });
 }
 
-/// One song in the Spotify-style in-app playlist.
+/// One song in the in-app playlist. A track can be bundled or streamed.
 class PlaylistTrack {
   final String title;
   final String artist;
-  final String audioAsset;
+  final String? audioAsset;
+  final String? audioUrl;
+  final Map<String, String> audioHeaders;
   final String? coverAsset;
+  final String? coverUrl;
+  final Map<String, String> coverHeaders;
   final Duration? duration;
   const PlaylistTrack({
     required this.title,
     required this.artist,
-    required this.audioAsset,
+    this.audioAsset,
+    this.audioUrl,
+    this.audioHeaders = const {},
     this.coverAsset,
+    this.coverUrl,
+    this.coverHeaders = const {},
     this.duration,
   });
 }

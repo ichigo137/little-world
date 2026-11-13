@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import '../content.dart';
 import '../state/journey_state.dart';
 import '../theme/app_theme.dart';
 import '../widgets/animated_background.dart';
 import '../widgets/memory_reveal_card.dart';
 import '../widgets/section_header.dart';
 import '../services/audio_manager.dart';
+import '../services/media_catalog.dart';
 
 class TreehouseScreen extends StatefulWidget {
   const TreehouseScreen({super.key});
@@ -17,17 +18,8 @@ class TreehouseScreen extends StatefulWidget {
 }
 
 class _TreehouseScreenState extends State<TreehouseScreen> {
-  late List<bool> _lit;
-
-  @override
-  void initState() {
-    super.initState();
-    final journey = context.read<JourneyState>();
-    _lit = journey.getOrInitTreehouseLit(AppContent.treehouseMemories.length);
-  }
-
-  void _checkComplete() {
-    if (_lit.every((b) => b)) {
+  void _checkComplete(List<bool> lit) {
+    if (lit.every((b) => b)) {
       context.read<JourneyState>().completeTreehouse();
     }
   }
@@ -45,6 +37,12 @@ class _TreehouseScreenState extends State<TreehouseScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final memories = context.watch<MediaCatalog>().treehouseMemories;
+    final lit =
+        context.watch<JourneyState>().getOrInitTreehouseLit(memories.length);
+    final allLit = lit.every((b) => b);
+    final countLit = lit.where((b) => b).length;
+
     return Scaffold(
       body: AnimatedSkyBackground(
         gradientColors: AppTheme.nightMoss,
@@ -56,6 +54,27 @@ class _TreehouseScreenState extends State<TreehouseScreen> {
                 title: 'The Treehouse',
                 subtitle: 'light up every window',
               ),
+              const SizedBox(height: 4),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+                decoration: BoxDecoration(
+                  color: AppTheme.nightSoft.withValues(alpha: 0.7),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: AppTheme.lavender.withValues(alpha: 0.25),
+                    width: 1,
+                  ),
+                ),
+                child: Text(
+                  '$countLit / ${memories.length} lit',
+                  style: GoogleFonts.comfortaa(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: allLit ? AppTheme.gold : AppTheme.textSoft,
+                  ),
+                ),
+              ),
               Expanded(
                 child: Center(
                   child: AspectRatio(
@@ -65,36 +84,40 @@ class _TreehouseScreenState extends State<TreehouseScreen> {
                       child: LayoutBuilder(
                         builder: (context, constraints) {
                           final positions =
-                              _windowPositions(AppContent.treehouseMemories.length);
+                              _windowPositions(memories.length);
                           return Stack(
                             children: List.generate(
-                              AppContent.treehouseMemories.length,
+                              memories.length,
                               (i) {
                                 final pos = positions[i];
                                 return Positioned(
                                   left: pos.dx * constraints.maxWidth - 22,
                                   top: pos.dy * constraints.maxHeight - 22,
                                   child: GestureDetector(
+                                    key: ValueKey('window_$i'),
+                                    behavior: HitTestBehavior.opaque,
                                     onTap: () async {
-                                      if (!_lit[i]) {
+                                      if (!lit[i]) {
                                         HapticFeedback.lightImpact();
-                                        context.read<JourneyState>().lightWindow(i);
-                                        setState(() {});
+                                        context.read<JourneyState>().lightWindow(
+                                              i,
+                                              totalCount: memories.length,
+                                            );
                                         AudioManager.instance.play(Sfx.window);
                                       }
                                       await showMemoryReveal(
                                         context,
-                                        AppContent.treehouseMemories[i],
+                                        memories[i],
                                         accent: const Color(0xFF8FBF87),
                                       );
-                                      _checkComplete();
+                                      _checkComplete(lit);
                                     },
                                     child: AnimatedContainer(
                                       duration: const Duration(milliseconds: 500),
                                       width: 44,
                                       height: 44,
                                       decoration: BoxDecoration(
-                                        color: _lit[i]
+                                        color: lit[i]
                                             ? const Color(0xFFFFE9A8)
                                             : const Color(0xFF3F3126),
                                         borderRadius: BorderRadius.circular(8),
@@ -102,7 +125,7 @@ class _TreehouseScreenState extends State<TreehouseScreen> {
                                           color: const Color(0xFF2E241C),
                                           width: 3,
                                         ),
-                                        boxShadow: _lit[i]
+                                        boxShadow: lit[i]
                                             ? [
                                                 BoxShadow(
                                                   color: const Color(0xFFFFE9A8)
@@ -125,6 +148,29 @@ class _TreehouseScreenState extends State<TreehouseScreen> {
                   ),
                 ),
               ),
+              if (allLit)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 24),
+                  child: TextButton.icon(
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const Icon(Icons.arrow_back_rounded,
+                        size: 18, color: AppTheme.textDark),
+                    label: Text(
+                      'back to your world \u2728',
+                      style: GoogleFonts.comfortaa(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.textDark,
+                      ),
+                    ),
+                    style: TextButton.styleFrom(
+                      backgroundColor: AppTheme.gold,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 12),
+                      shape: const StadiumBorder(),
+                    ),
+                  ),
+                ),
             ],
           ),
         ),

@@ -103,3 +103,26 @@ source once — approve it, and it installs like a normal app.
   these hex values to shift the whole app's mood
 
 Happy birthday to her. Good luck. 🎂
+
+
+---
+
+## 5. Optional Supabase photo storage
+
+The app keeps all songs and playlist artwork bundled in `assets/music/`. Supabase stores only the Garden and Treehouse photos plus `manifest.json`.
+
+- `supabase/` — private bucket SQL setup, sample manifest and setup instructions.
+- `lib/services/media_catalog.dart` — authenticates and loads photo memories from Supabase Storage.
+- `lib/widgets/media_access_gate.dart` — email/password sign-in for the private photo collection.
+
+Follow `supabase/README.md` to configure the project, create Mishtu's user, create the private bucket and upload photos.
+
+Run the app with:
+
+```powershell
+flutter run --dart-define=SUPABASE_URL=https://<project-ref>.supabase.co --dart-define=SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+```
+
+Build the release APK with the same two `--dart-define` values.
+
+Never place a Supabase secret or service-role key in the Flutter app. Keep public sign-ups disabled and use the publishable key with Storage RLS. The playlist remains available offline even when the photo service is not configured.

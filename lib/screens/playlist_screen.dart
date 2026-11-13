@@ -4,6 +4,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../content.dart';
+import '../services/audio_manager.dart';
 import '../theme/app_theme.dart';
 import '../widgets/animated_background.dart';
 import '../widgets/section_header.dart';
@@ -30,12 +31,14 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
   Duration _duration = Duration.zero;
   bool _shuffle = false;
   bool _repeat = true;
+  int _loadToken = 0;
 
   List<PlaylistTrack> get _tracks => AppContent.finalePlaylist;
 
   @override
   void initState() {
     super.initState();
+    AudioManager.instance.pauseAmbient();
     _subscriptions.add(_player.onPlayerStateChanged.listen((state) {
       if (!mounted) return;
       setState(() => _playing = state == PlayerState.playing);
@@ -58,6 +61,7 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
 
   @override
   void dispose() {
+    AudioManager.instance.resumeAmbient();
     for (final sub in _subscriptions) {
       sub.cancel();
     }
@@ -68,6 +72,7 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
 
   Future<void> _load(int index) async {
     if (_tracks.isEmpty) return;
+    final token = ++_loadToken;
     final safe = index.clamp(0, _tracks.length - 1);
     setState(() {
       _index = safe;
@@ -77,12 +82,21 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
     final track = _tracks[safe];
     try {
       await _player.stop();
+      if (token != _loadToken || !mounted) return;
       await _player.setReleaseMode(ReleaseMode.stop);
-      await _player.play(AssetSource(track.audioAsset));
+      if (token != _loadToken || !mounted) return;
+      if (track.audioUrl != null) {
+        await _player.play(UrlSource(track.audioUrl!));
+      } else if (track.audioAsset != null) {
+        await _player.play(AssetSource(track.audioAsset!));
+      } else {
+        throw StateError('This track has no playable media source.');
+      }
+      if (token != _loadToken || !mounted) return;
     } catch (_) {
+      if (token != _loadToken || !mounted) return;
       // Missing/corrupt asset (or audio unavailable in this context).
       // Land on the track but stay paused instead of retrying forever.
-      if (!mounted) return;
       setState(() {
         _playing = false;
         _position = Duration.zero;
@@ -359,7 +373,7 @@ class _TrackTile extends StatelessWidget {
   }
 }
 
-class _PlayerBar extends StatelessWidget {
+class _PlayerBar extends StatefulWidget {
   final Duration position;
   final Duration duration;
   final bool playing;
@@ -387,9 +401,21 @@ class _PlayerBar extends StatelessWidget {
   });
 
   @override
+  State<_PlayerBar> createState() => _PlayerBarState();
+}
+
+class _PlayerBarState extends State<_PlayerBar> {
+  double? _dragValue;
+
+  @override
   Widget build(BuildContext context) {
-    final maxMs = math.max(1, duration.inMilliseconds);
-    final value = position.inMilliseconds.clamp(0, maxMs).toDouble();
+    final maxMs = math.max(1, widget.duration.inMilliseconds);
+    final currentPosMs = widget.position.inMilliseconds.clamp(0, maxMs).toDouble();
+    final displayValue = (_dragValue ?? currentPosMs).clamp(0.0, maxMs.toDouble()).toDouble();
+    final displayDuration = _dragValue != null
+        ? Duration(milliseconds: _dragValue!.round())
+        : widget.position;
+
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
       decoration: BoxDecoration(
@@ -402,7 +428,7 @@ class _PlayerBar extends StatelessWidget {
           Row(
             children: [
               Text(
-                _fmt(position),
+                _fmt(displayDuration),
                 style: GoogleFonts.comfortaa(
                     fontSize: 11, color: AppTheme.textSoft),
               ),
@@ -417,15 +443,25 @@ class _PlayerBar extends StatelessWidget {
                     overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
                   ),
                   child: Slider(
-                    value: value,
+                    value: displayValue,
                     max: maxMs.toDouble(),
-                    onChanged: (v) => onSeek(v.round()),
-                    onChangeEnd: (v) => onSeek(v.round()),
+                    onChanged: (v) {
+                      setState(() {
+                        _dragValue = v;
+                      });
+                    },
+                    onChangeEnd: (v) {
+                      final target = v.round();
+                      setState(() {
+                        _dragValue = null;
+                      });
+                      widget.onSeek(target);
+                    },
                   ),
                 ),
               ),
               Text(
-                _fmt(duration),
+                _fmt(widget.duration),
                 style: GoogleFonts.comfortaa(
                     fontSize: 11, color: AppTheme.textSoft),
               ),
@@ -435,16 +471,16 @@ class _PlayerBar extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               IconButton(
-                onPressed: onShuffle,
+                onPressed: widget.onShuffle,
                 icon: Icon(
                   Icons.shuffle_rounded,
                   size: 20,
-                  color: shuffle ? AppTheme.mint : AppTheme.textSoft,
+                  color: widget.shuffle ? AppTheme.mint : AppTheme.textSoft,
                 ),
               ),
               const SizedBox(width: 14),
               IconButton(
-                onPressed: onPrev,
+                onPressed: widget.onPrev,
                 icon: const Icon(
                   Icons.skip_previous_rounded,
                   color: AppTheme.textLight,
@@ -453,7 +489,7 @@ class _PlayerBar extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               GestureDetector(
-                onTap: onPlay,
+                onTap: widget.onPlay,
                 child: Container(
                   width: 58,
                   height: 58,
@@ -462,7 +498,7 @@ class _PlayerBar extends StatelessWidget {
                     color: AppTheme.blush,
                   ),
                   child: Icon(
-                    playing
+                    widget.playing
                         ? Icons.pause_rounded
                         : Icons.play_arrow_rounded,
                     color: AppTheme.textDark,
@@ -472,7 +508,7 @@ class _PlayerBar extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               IconButton(
-                onPressed: onNext,
+                onPressed: widget.onNext,
                 icon: const Icon(
                   Icons.skip_next_rounded,
                   color: AppTheme.textLight,
@@ -481,11 +517,11 @@ class _PlayerBar extends StatelessWidget {
               ),
               const SizedBox(width: 14),
               IconButton(
-                onPressed: onRepeat,
+                onPressed: widget.onRepeat,
                 icon: Icon(
-                  repeat ? Icons.repeat_rounded : Icons.repeat_one_rounded,
+                  widget.repeat ? Icons.repeat_rounded : Icons.repeat_one_rounded,
                   size: 20,
-                  color: repeat ? AppTheme.mint : AppTheme.textSoft,
+                  color: widget.repeat ? AppTheme.mint : AppTheme.textSoft,
                 ),
               ),
             ],
@@ -551,16 +587,25 @@ class _ArtworkState extends State<_Artwork>
 
   @override
   Widget build(BuildContext context) {
-    if (widget.track.coverAsset != null) {
+    if (widget.track.coverUrl != null || widget.track.coverAsset != null) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(14),
-        child: Image.asset(
-          widget.track.coverAsset!,
-          width: widget.size,
-          height: widget.size,
-          fit: BoxFit.cover,
-          errorBuilder: (c, e, s) => _vinyl(context),
-        ),
+        child: widget.track.coverUrl != null
+            ? Image.network(
+                widget.track.coverUrl!,
+                headers: widget.track.coverHeaders,
+                width: widget.size,
+                height: widget.size,
+                fit: BoxFit.cover,
+                errorBuilder: (c, e, s) => _vinyl(context),
+              )
+            : Image.asset(
+                widget.track.coverAsset!,
+                width: widget.size,
+                height: widget.size,
+                fit: BoxFit.cover,
+                errorBuilder: (c, e, s) => _vinyl(context),
+              ),
       );
     }
     return _vinyl(context);

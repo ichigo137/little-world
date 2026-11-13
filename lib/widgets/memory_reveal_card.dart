@@ -63,17 +63,27 @@ class _MemoryCard extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (memory.photoAsset != null)
+                if (memory.photoUrl != null || memory.photoAsset != null)
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Image.asset(
-                      memory.photoAsset!,
-                      height: 180,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stack) =>
-                          _placeholderPhoto(accent),
-                    ),
+                    child: memory.photoUrl != null
+                        ? Image.network(
+                            memory.photoUrl!,
+                            headers: memory.photoHeaders,
+                            height: 180,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stack) =>
+                                _placeholderPhoto(accent),
+                          )
+                        : Image.asset(
+                            memory.photoAsset!,
+                            height: 180,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stack) =>
+                                _placeholderPhoto(accent),
+                          ),
                   )
                 else
                   _placeholderPhoto(accent),

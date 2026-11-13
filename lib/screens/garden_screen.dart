@@ -1,14 +1,15 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import '../content.dart';
 import '../state/journey_state.dart';
 import '../theme/app_theme.dart';
 import '../widgets/animated_background.dart';
 import '../widgets/memory_reveal_card.dart';
 import '../widgets/section_header.dart';
 import '../services/audio_manager.dart';
+import '../services/media_catalog.dart';
 
 class GardenScreen extends StatefulWidget {
   const GardenScreen({super.key});
@@ -19,7 +20,6 @@ class GardenScreen extends StatefulWidget {
 
 class _GardenScreenState extends State<GardenScreen>
     with TickerProviderStateMixin {
-  late List<bool> _bloomed;
   late final AnimationController _world; // drives petals & butterflies
   late final List<_PetalSpec> _petals;
   late final List<_ButterflySpec> _butterflies;
@@ -27,8 +27,6 @@ class _GardenScreenState extends State<GardenScreen>
   @override
   void initState() {
     super.initState();
-    final journey = context.read<JourneyState>();
-    _bloomed = journey.getOrInitGardenBloomed(AppContent.gardenMemories.length);
     _world = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 30),
@@ -69,14 +67,20 @@ class _GardenScreenState extends State<GardenScreen>
     super.dispose();
   }
 
-  void _checkComplete() {
-    if (_bloomed.every((b) => b)) {
+  void _checkComplete(List<bool> bloomed) {
+    if (bloomed.every((b) => b)) {
       context.read<JourneyState>().completeGarden();
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final memories = context.watch<MediaCatalog>().gardenMemories;
+    final bloomed =
+        context.watch<JourneyState>().getOrInitGardenBloomed(memories.length);
+    final allBloomed = bloomed.every((b) => b);
+    final countBloomed = bloomed.where((b) => b).length;
+
     return Scaffold(
       body: AnimatedSkyBackground(
         gradientColors: AppTheme.nightMoss,
@@ -92,6 +96,27 @@ class _GardenScreenState extends State<GardenScreen>
                     title: 'The Garden of Us',
                     subtitle: 'tap a flower to let it bloom',
                   ),
+                  const SizedBox(height: 4),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: AppTheme.nightSoft.withValues(alpha: 0.7),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: AppTheme.lavender.withValues(alpha: 0.25),
+                        width: 1,
+                      ),
+                    ),
+                    child: Text(
+                      '$countBloomed / ${memories.length} bloomed',
+                      style: GoogleFonts.comfortaa(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: allBloomed ? AppTheme.gold : AppTheme.textSoft,
+                      ),
+                    ),
+                  ),
                   Expanded(
                     child: GridView.builder(
                       padding: const EdgeInsets.all(28),
@@ -101,30 +126,55 @@ class _GardenScreenState extends State<GardenScreen>
                         mainAxisSpacing: 24,
                         crossAxisSpacing: 16,
                       ),
-                      itemCount: AppContent.gardenMemories.length,
+                      itemCount: memories.length,
                       itemBuilder: (context, index) {
                         return _Flower(
                           key: ValueKey('flower_$index'),
-                          bloomed: _bloomed[index],
+                          bloomed: bloomed[index],
                           colorSeed: index,
                           onTap: () async {
-                            if (!_bloomed[index]) {
+                            if (!bloomed[index]) {
                               HapticFeedback.mediumImpact();
-                              context.read<JourneyState>().bloomFlower(index);
-                              setState(() {});
+                              context.read<JourneyState>().bloomFlower(
+                                    index,
+                                    totalCount: memories.length,
+                                  );
                               AudioManager.instance.play(Sfx.bloom);
                             }
                             await showMemoryReveal(
                               context,
-                              AppContent.gardenMemories[index],
+                              memories[index],
                               accent: _flowerColor(index),
                             );
-                            _checkComplete();
+                            _checkComplete(bloomed);
                           },
                         );
                       },
                     ),
                   ),
+                  if (allBloomed)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 24),
+                      child: TextButton.icon(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(Icons.arrow_back_rounded,
+                            size: 18, color: AppTheme.textDark),
+                        label: Text(
+                          'back to your world \u2728',
+                          style: GoogleFonts.comfortaa(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.textDark,
+                          ),
+                        ),
+                        style: TextButton.styleFrom(
+                          backgroundColor: AppTheme.gold,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 12),
+                          shape: const StadiumBorder(),
+                        ),
+                      ),
+                    ),
                 ],
               ),
               // Falling petals drift over everything, under the dialogs.

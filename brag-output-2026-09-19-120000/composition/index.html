@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1280, height=720">
+  <title>Her Little World</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Comfortaa:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --nightDeep: #1B1533;
+      --night: #282047;
+      --nightSoft: #3A315C;
+      --nightMoss1: #16252B;
+      --nightMoss2: #22383C;
+      --nightMoss3: #2E4744;
+      --nightRose1: #241A44;
+      --nightRose2: #3A2A55;
+      --nightRose3: #523B5E;
+      --skyNight1: #1F1B3A;
+      --skyNight2: #3B3255;
+      --blush: #FFD6E8;
+      --lavender: #DCC9FF;
+      --mint: #C9F2DC;
+      --peach: #FFDFC0;
+      --gold: #E8B86D;
+      --textLight: #F4F0FF;
+      --textSoft: #BFB6DE;
+      --flower1: #EF9FBF;
+      --flower2: #F6C066;
+      --flower3: #B08FE8;
+      --flower4: #8FBF87;
+      --flower5: #7FC7D9;
+      --flower6: #E8846C;
+    }
+
+    body {
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: 'Comfortaa', sans-serif;
+    }
+
+    [data-composition-id="root"] {
+      position: relative;
+      width: 1280px;
+      height: 720px;
+      overflow: hidden;
+    }
+
+    .clip {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    /* ========== SCENE 1: THE GIFT ========== */
+    #scene-gift {
+      background: radial-gradient(ellipse at 50% 40%, var(--night) 0%, var(--nightDeep) 70%);
+    }
+
+    .stars-layer {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .star {
+      position: absolute;
+      border-radius: 50%;
+      background: var(--textLight);
+    }
+
+    /* Gift Box */
+    .gift-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 160px;
+      height: 200px;
+    }
+
+    .gift-glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(232,184,109,0.35) 0%, rgba(232,184,109,0) 70%);
+      pointer-events: none;
+    }
+
+    .gift-box-body {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 90px;
+      background: var(--blush);
+      border-radius: 8px 8px 12px 12px;
+      box-shadow: 0 8px 32px rgba(255,214,232,0.3);
+    }
+
+    .gift-box-lid {
+      position: absolute;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 136px;
+      height: 28px;
+      background: var(--peach);
+      border-radius: 6px 6px 4px 4px;
+      box-shadow: 0 4px 16px rgba(255,223,192,0.3);
+    }
+
+    .gift-ribbon-v {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 14px;
+      height: 118px;
+      background: var(--gold);
+      border-radius: 3px;
+    }
+
+    .gift-ribbon-h {
+      position: absolute;
+      bottom: 42px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 136px;
+      height: 14px;
+      background: var(--gold);
+      border-radius: 3px;
+    }
+
+    .gift-bow {
+      position: absolute;
+      bottom: 112px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50px;
+      height: 30px;
+    }
+
+    .gift-bow-loop {
+      position: absolute;
+      width: 24px;
+      height: 20px;
+      border: 4px solid var(--gold);
+      border-radius: 50% 50% 50% 50%;
+      background: transparent;
+    }
+
+    .gift-bow-loop.left {
+      left: 2px;
+      top: 0;
+      transform: rotate(-15deg);
+    }
+
+    .gift-bow-loop.right {
+      right: 2px;
+      top: 0;
+      transform: rotate(15deg);
+    }
+
+    .gift-bow-knot {
+      position: absolute;
+      left: 50%;
+      bottom: -2px;
+      transform: translateX(-50%);
+      width: 12px;
+      height: 10px;
+      background: var(--gold);
+      border-radius: 50%;
+    }
+
+    .gift-tagline {
+      position: absolute;
+      bottom: 80px;
+      width: 100%;
+      text-align: center;
+      font-family: 'Comfortaa', sans-serif;
+      font-size: 18px;
+      font-weight: 400;
+      color: var(--textLight);
+      letter-spacing: 0.5px;
+      opacity: 0;
+    }
+
+    .sparkle {
+      position: absolute;
+      border-radius: 50%;
+      background: var(--gold);
+      pointer-events: none;
+    }
+
+    /* ========== SCENE 2: THE GARDEN ========== */
+    #scene-garden {
+      background: linear-gradient(180deg, var(--nightMoss1) 0%, var(--nightMoss2) 50%, var(--nightMoss3) 100%);
+    }
+
+    .garden-title {
+      position: absolute;
+      top: 36px;
+      width: 100%;
+      text-align: center;
+      font-family: 'Caveat', cursive;
+      font-size: 36px;
+      font-weight: 600;
+      color: var(--textLight);
+      opacity: 0;
+    }
+
+    .garden-subtitle {
+      position: absolute;
+      top: 90px;
+      width: 100%;
+      text-align: center;
+      font-family: 'Comfortaa', sans-serif;
+      font-size: 14px;
+      color: var(--textSoft);
+      opacity: 0;
+    }
+
+    .flowers-grid {
+      position: absolute;
+      top: 140px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: grid;
+      grid-template-columns: repeat(3, 200px);
+      grid-template-rows: repeat(2, 200px);
+      gap: 40px;
+      width: 680px;
+    }
+
+    .flower-item {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .flower-stem {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 0;
+      background: #4a8c5c;
+      border-radius: 2px;
+    }
+
+    .flower-leaf {
+      position: absolute;
+      width: 18px;
+      height: 10px;
+      background: #5ca86c;
+      border-radius: 50% 50% 50% 0;
+      opacity: 0;
+    }
+
+    .flower-leaf.left {
+      left: calc(50% - 20px);
+      bottom: 60px;
+      transform: rotate(-30deg);
+    }
+
+    .flower-leaf.right {
+      right: calc(50% - 20px);
+      bottom: 70px;
+      transform: rotate(30deg) scaleX(-1);
+    }
+
+    .flower-head {
+      position: absolute;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%) scale(0);
+      width: 60px;
+      height: 60px;
+    }
+
+    .flower-petal {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-radius: 50% 50% 50% 0;
+      top: 50%;
+      left: 50%;
+    }
+
+    .flower-center {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      background: var(--gold);
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 2;
+      box-shadow: 0 0 8px rgba(232,184,109,0.6);
+    }
+
+    .memory-card {
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(40,32,71,0.85);
+      border: 1px solid rgba(232,184,109,0.3);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-family: 'Comfortaa', sans-serif;
+      font-size: 10px;
+      color: var(--textSoft);
+      white-space: nowrap;
+      opacity: 0;
+      backdrop-filter: blur(4px);
+    }
+
+    .falling-petal {
+      position: absolute;
+      border-radius: 50% 0 50% 50%;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* ========== SCENE 3: THE CONSTELLATION ========== */
+    #scene-constellation {
+      background: linear-gradient(180deg, var(--skyNight1) 0%, var(--skyNight2) 100%);
+    }
+
+    .constellation-title {
+      position: absolute;
+      top: 40px;
+      width: 100%;
+      text-align: center;
+      font-family: 'Caveat', cursive;
+      font-size: 36px;
+      font-weight: 600;
+      color: var(--textLight);
+      opacity: 0;
+    }
+
+    .constellation-field {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .constellation-star {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 12px rgba(232,184,109,0.8), 0 0 24px rgba(232,184,109,0.4);
+      opacity: 0;
+      transform: translate(-50%, -50%);
+    }
+
+    .constellation-line {
+      position: absolute;
+      height: 2px;
+      background: rgba(244,240,255,0.5);
+      transform-origin: 0 50%;
+      opacity: 0;
+    }
+
+    .heart-glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 250px;
+      height: 250px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(232,184,109,0.25) 0%, rgba(232,184,109,0) 70%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .shooting-star {
+      position: absolute;
+      top: 120px;
+      left: 100px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 0 6px #fff, -20px 0 12px rgba(255,255,255,0.5), -50px 0 20px rgba(255,255,255,0.3);
+      opacity: 0;
+    }
+
+    .shooting-trail {
+      position: absolute;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), #fff);
+      transform-origin: right center;
+      opacity: 0;
+    }
+
+    .constellation-message {
+      position: absolute;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(58,49,92,0.85);
+      border: 1px solid rgba(232,184,109,0.3);
+      border-radius: 14px;
+      padding: 16px 28px;
+      font-family: 'Comfortaa', sans-serif;
+      font-size: 16px;
+      color: var(--textLight);
+      text-align: center;
+      max-width: 500px;
+      opacity: 0;
+      backdrop-filter: blur(6px);
+    }
+
+    /* Background stars for constellation */
+    .bg-star {
+      position: absolute;
+      border-radius: 50%;
+      background: var(--textLight);
+    }
+
+    /* ========== SCENE 4: THE FINALE ========== */
+    #scene-finale {
+      background: linear-gradient(180deg, var(--nightRose1) 0%, var(--nightRose2) 50%, var(--nightRose3) 100%);
+    }
+
+    .finale-wish {
+      position: absolute;
+      top: 60px;
+      width: 100%;
+      text-align: center;
+      font-family: 'Caveat', cursive;
+      font-size: 34px;
+      font-weight: 500;
+      color: var(--textLight);
+      opacity: 0;
+    }
+
+    /* Candle */
+    .candle-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80px;
+      height: 180px;
+    }
+
+    .candle-body {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 36px;
+      height: 100px;
+      background: linear-gradient(180deg, var(--blush) 0%, #f0c4d8 100%);
+      border-radius: 4px 4px 6px 6px;
+      box-shadow: 0 4px 16px rgba(255,214,232,0.3);
+    }
+
+    .candle-wick {
+      position: absolute;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 3px;
+      height: 14px;
+      background: #5a4a6a;
+      border-radius: 2px 2px 0 0;
+    }
+
+    .candle-flame {
+      position: absolute;
+      bottom: 112px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 18px;
+      height: 28px;
+      opacity: 0;
+    }
+
+    .flame-inner {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 12px;
+      height: 22px;
+      background: linear-gradient(180deg, var(--gold) 0%, var(--peach) 40%, #ff9966 100%);
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      filter: blur(1px);
+    }
+
+    .flame-outer {
+      position: absolute;
+      bottom: -2px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 18px;
+      height: 28px;
+      background: linear-gradient(180deg, rgba(232,184,109,0.6) 0%, rgba(255,153,102,0.3) 100%);
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      filter: blur(3px);
+    }
+
+    .candle-halo {
+      position: absolute;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(232,184,109,0.3) 0%, rgba(232,184,109,0) 70%);
+      pointer-events: none;
+    }
+
+    .smoke-wisp {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: rgba(180,170,200,0.4);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Confetti */
+    .confetti-piece {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Balloons */
+    .balloon {
+      position: absolute;
+      bottom: -120px;
+      width: 50px;
+      height: 65px;
+      border-radius: 50% 50% 50% 50% / 55% 55% 45% 45%;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .balloon::before {
+      content: '';
+      position: absolute;
+      top: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2px;
+      height: 50px;
+      background: rgba(244,240,255,0.4);
+    }
+
+    .balloon::after {
+      content: '';
+      position: absolute;
+      top: 12px;
+      left: 14px;
+      width: 12px;
+      height: 14px;
+      background: rgba(255,255,255,0.25);
+      border-radius: 50%;
+      transform: rotate(-30deg);
+    }
+
+    .finale-birthday {
+      position: absolute;
+      top: 42%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Caveat', cursive;
+      font-size: 52px;
+      font-weight: 700;
+      color: var(--gold);
+      text-shadow: 0 0 30px rgba(232,184,109,0.5);
+      opacity: 0;
+      white-space: nowrap;
+    }
+
+    .shimmer-overlay {
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 60px;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+      pointer-events: none;
+    }
+
+    .finale-name {
+      position: absolute;
+      top: calc(42% + 55px);
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Caveat', cursive;
+      font-size: 32px;
+      font-weight: 500;
+      color: var(--textLight);
+      opacity: 0;
+    }
+
+    .finale-qr-hint {
+      position: absolute;
+      bottom: 50px;
+      width: 100%;
+      text-align: center;
+      font-family: 'Caveat', cursive;
+      font-size: 20px;
+      color: var(--blush);
+      opacity: 0;
+    }
+
+    /* Final fade overlay */
+    .fade-to-black {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      opacity: 0;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div data-composition-id="root" data-width="1280" data-height="720">
+
+    <!-- ==================== SCENE 1: THE GIFT (0-4.5s) ==================== -->
+    <div id="scene-gift" class="clip" data-start="0" data-duration="4.5">
+      <!-- Stars -->
+      <div class="stars-layer" id="gift-stars"></div>
+
+      <!-- Gift glow -->
+      <div class="gift-glow" id="gift-glow"></div>
+
+      <!-- Gift box -->
+      <div class="gift-container" id="gift-box">
+        <div class="gift-box-lid"></div>
+        <div class="gift-ribbon-v"></div>
+        <div class="gift-ribbon-h"></div>
+        <div class="gift-box-body"></div>
+        <div class="gift-bow">
+          <div class="gift-bow-loop left"></div>
+          <div class="gift-bow-loop right"></div>
+          <div class="gift-bow-knot"></div>
+        </div>
+      </div>
+
+      <!-- Tagline -->
+      <div class="gift-tagline" id="gift-tagline">a tiny world I built, just for you</div>
+
+      <!-- Sparkles (generated by JS) -->
+      <div id="sparkles-container"></div>
+    </div>
+
+    <!-- ==================== SCENE 2: THE GARDEN (4.5-9.5s) ==================== -->
+    <div id="scene-garden" class="clip" data-start="4.5" data-duration="5">
+      <div class="garden-title" id="garden-title">The Garden of Us</div>
+      <div class="garden-subtitle" id="garden-subtitle">tap a flower to let it bloom</div>
+
+      <div class="flowers-grid" id="flowers-grid"></div>
+
+      <!-- Falling petals -->
+      <div id="falling-petals"></div>
+    </div>
+
+    <!-- ==================== SCENE 3: THE CONSTELLATION (9.5-14.5s) ==================== -->
+    <div id="scene-constellation" class="clip" data-start="9.5" data-duration="5">
+      <!-- Background stars -->
+      <div id="constellation-bg-stars"></div>
+
+      <div class="constellation-title" id="constellation-title">Starry Hill</div>
+
+      <div class="constellation-field" id="constellation-field"></div>
+
+      <div class="heart-glow" id="heart-glow"></div>
+
+      <!-- Shooting star -->
+      <div class="shooting-star" id="shooting-star"></div>
+
+      <div class="constellation-message" id="constellation-message">
+        Every star up there is a reason I'm glad you exist.
+      </div>
+    </div>
+
+    <!-- ==================== SCENE 4: THE FINALE (14.5-20s) ==================== -->
+    <div id="scene-finale" class="clip" data-start="14.5" data-duration="5.5">
+      <div class="finale-wish" id="finale-wish">Make a wish...</div>
+
+      <!-- Candle -->
+      <div class="candle-container" id="candle-container">
+        <div class="candle-halo" id="candle-halo"></div>
+        <div class="candle-flame" id="candle-flame">
+          <div class="flame-outer"></div>
+          <div class="flame-inner"></div>
+        </div>
+        <div class="candle-wick"></div>
+        <div class="candle-body"></div>
+      </div>
+
+      <!-- Smoke wisps -->
+      <div id="smoke-container"></div>
+
+      <!-- Confetti -->
+      <div id="confetti-container"></div>
+
+      <!-- Balloons -->
+      <div id="balloons-container"></div>
+
+      <!-- Birthday text -->
+      <div class="finale-birthday" id="finale-birthday">
+        Happy Birthday
+        <div class="shimmer-overlay" id="birthday-shimmer"></div>
+      </div>
+
+      <div class="finale-name" id="finale-name">MISHTU</div>
+
+      <div class="finale-qr-hint" id="finale-qr-hint">one more little thing</div>
+
+      <!-- Fade to black -->
+      <div class="fade-to-black" id="fade-to-black"></div>
+    </div>
+
+    <!-- ==================== AUDIO ==================== -->
+    <audio id="bg-music" data-start="0" data-duration="20" data-track-index="10" data-volume="0.32" src="assets/music/happy-beats-business-moves-vol-9-by-ende-dot-app.mp3"></audio>
+    <audio id="sfx-drop-1" data-start="5.0" data-track-index="11" data-volume="0.65" src="assets/sfx/interface/drop_001.ogg"></audio>
+    <audio id="sfx-drop-2" data-start="5.5" data-track-index="12" data-volume="0.60" src="assets/sfx/interface/drop_002.ogg"></audio>
+    <audio id="sfx-drop-3" data-start="6.0" data-track-index="13" data-volume="0.55" src="assets/sfx/interface/drop_001.ogg"></audio>
+    <audio id="sfx-click-1" data-start="10.5" data-track-index="14" data-volume="0.55" src="assets/sfx/interface/click_001.ogg"></audio>
+    <audio id="sfx-impact-1" data-start="16.5" data-track-index="15" data-volume="0.70" src="assets/sfx/impact/impactSoft_medium_000.ogg"></audio>
+    <audio id="sfx-bell-1" data-start="17.8" data-track-index="16" data-volume="0.75" src="assets/sfx/impact/impactBell_heavy_000.ogg"></audio>
+
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script>
+    // ============================================================
+    // GENERATE STATIC ELEMENTS
+    // ============================================================
+
+    // --- Scene 1: Stars ---
+    (function generateGiftStars() {
+      const container = document.getElementById('gift-stars');
+      const positions = [
+        [80,60],[200,120],[350,40],[500,90],[650,55],[780,110],[900,70],[1050,130],[1180,50],
+        [120,200],[300,280],[520,180],[700,300],[880,220],[1060,280],[150,400],[400,450],
+        [680,420],[950,380],[1100,420],[50,550],[250,600],[500,580],[750,620],[1000,560],[1200,600],
+        [320,150],[600,130],[820,180],[1150,200],[450,350],[720,500],[980,480],[180,500],[1100,520]
+      ];
+      positions.forEach(([x, y], i) => {
+        const s = document.createElement('div');
+        s.className = 'star';
+        const size = 1.5 + (i % 3) * 0.8;
+        s.style.cssText = `left:${x}px;top:${y}px;width:${size}px;height:${size}px;opacity:${0.3 + (i%4)*0.15};`;
+        container.appendChild(s);
+      });
+    })();
+
+    // --- Scene 1: Sparkles ---
+    (function generateSparkles() {
+      const container = document.getElementById('sparkles-container');
+      const positions = [
+        [580,250],[700,280],[620,350],[660,310],[540,320],[710,370],[590,400],[680,240],[630,380],[660,420]
+      ];
+      positions.forEach(([x, y], i) => {
+        const sp = document.createElement('div');
+        sp.className = 'sparkle';
+        sp.id = `sparkle-${i}`;
+        const size = 3 + (i % 3) * 1.5;
+        sp.style.cssText = `left:${x}px;top:${y}px;width:${size}px;height:${size}px;`;
+        container.appendChild(sp);
+      });
+    })();
+
+    // --- Scene 2: Flowers ---
+    (function generateFlowers() {
+      const grid = document.getElementById('flowers-grid');
+      const colors = ['#EF9FBF','#F6C066','#B08FE8','#8FBF87','#7FC7D9','#E8846C'];
+      const memories = [
+        'The first time we talked...',
+        'That random Tuesday adventure...',
+        'Every playlist you sent me...',
+        'The way you laugh at nothing...',
+        'Late night conversations...',
+        'Every little "thinking of you"'
+      ];
+
+      colors.forEach((color, i) => {
+        const item = document.createElement('div');
+        item.className = 'flower-item';
+        item.id = `flower-${i}`;
+
+        // Stem
+        const stem = document.createElement('div');
+        stem.className = 'flower-stem';
+        stem.id = `stem-${i}`;
+        item.appendChild(stem);
+
+        // Leaves
+        const leafL = document.createElement('div');
+        leafL.className = 'flower-leaf left';
+        leafL.id = `leaf-l-${i}`;
+        item.appendChild(leafL);
+
+        const leafR = document.createElement('div');
+        leafR.className = 'flower-leaf right';
+        leafR.id = `leaf-r-${i}`;
+        item.appendChild(leafR);
+
+        // Flower head
+        const head = document.createElement('div');
+        head.className = 'flower-head';
+        head.id = `head-${i}`;
+
+        // Center
+        const center = document.createElement('div');
+        center.className = 'flower-center';
+        head.appendChild(center);
+
+        // 6 petals arranged in a circle
+        for (let p = 0; p < 6; p++) {
+          const petal = document.createElement('div');
+          petal.className = 'flower-petal';
+          petal.style.background = color;
+          const angle = (p * 60) - 90;
+          const rad = angle * Math.PI / 180;
+          const px = Math.cos(rad) * 16;
+          const py = Math.sin(rad) * 16;
+          petal.style.transform = `translate(calc(-50% + ${px}px), calc(-50% + ${py}px)) rotate(${angle + 45}deg)`;
+          head.appendChild(petal);
+        }
+
+        item.appendChild(head);
+
+        // Memory card
+        const card = document.createElement('div');
+        card.className = 'memory-card';
+        card.id = `memory-${i}`;
+        card.textContent = memories[i];
+        item.appendChild(card);
+
+        grid.appendChild(item);
+      });
+    })();
+
+    // --- Scene 2: Falling petals ---
+    (function generateFallingPetals() {
+      const container = document.getElementById('falling-petals');
+      const petalColors = ['#EF9FBF','#F6C066','#B08FE8','#8FBF87'];
+      const petalData = [
+        { x: 200, color: petalColors[0] },
+        { x: 500, color: petalColors[1] },
+        { x: 800, color: petalColors[2] },
+        { x: 1050, color: petalColors[3] },
+      ];
+      petalData.forEach((pd, i) => {
+        const p = document.createElement('div');
+        p.className = 'falling-petal';
+        p.id = `falling-petal-${i}`;
+        const size = 8 + (i % 3) * 3;
+        p.style.cssText = `left:${pd.x}px;top:-20px;width:${size}px;height:${size}px;background:${pd.color};`;
+        container.appendChild(p);
+      });
+    })();
+
+    // --- Seeded PRNG (mulberry32) for deterministic renders ---
+    function mulberry32(a) {
+      return function() {
+        a |= 0; a = a + 0x6D2B79F5 | 0;
+        var t = Math.imul(a ^ a >>> 15, 1 | a);
+        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+      };
+    }
+    const seededRandom = mulberry32(42);
+
+    // --- Scene 3: Constellation background stars ---
+    (function generateConstellationBgStars() {
+      const container = document.getElementById('constellation-bg-stars');
+      for (let i = 0; i < 60; i++) {
+        const s = document.createElement('div');
+        s.className = 'bg-star';
+        const size = 1 + (i % 4) * 0.6;
+        s.style.cssText = `left:${seededRandom()*1280}px;top:${seededRandom()*720}px;width:${size}px;height:${size}px;opacity:${0.15 + seededRandom()*0.25};`;
+        container.appendChild(s);
+      }
+    })();
+
+    // --- Scene 3: Constellation stars and lines ---
+    (function generateConstellation() {
+      const field = document.getElementById('constellation-field');
+      // Heart coordinates normalized 0-1, scaled to scene
+      const heartPoints = [
+        [0.50, 0.25], [0.42, 0.18], [0.35, 0.22], [0.35, 0.32],
+        [0.42, 0.40], [0.50, 0.45], [0.58, 0.40], [0.65, 0.32],
+        [0.65, 0.22], [0.58, 0.18]
+      ];
+      // Offset to center vertically
+      const offsetY = 80;
+
+      heartPoints.forEach(([nx, ny], i) => {
+        const star = document.createElement('div');
+        star.className = 'constellation-star';
+        star.id = `cstar-${i}`;
+        star.style.left = `${nx * 1280}px`;
+        star.style.top = `${ny * 720 + offsetY}px`;
+        field.appendChild(star);
+      });
+
+      // Lines connecting sequential stars + close the loop
+      const connections = [];
+      for (let i = 0; i < heartPoints.length - 1; i++) {
+        connections.push([i, i + 1]);
+      }
+      connections.push([heartPoints.length - 1, 0]); // close the heart
+
+      connections.forEach(([a, b], i) => {
+        const line = document.createElement('div');
+        line.className = 'constellation-line';
+        line.id = `cline-${i}`;
+
+        const [x1, y1] = [heartPoints[a][0] * 1280, heartPoints[a][1] * 720 + offsetY];
+        const [x2, y2] = [heartPoints[b][0] * 1280, heartPoints[b][1] * 720 + offsetY];
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const len = Math.sqrt(dx * dx + dy * dy);
+        const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+
+        line.style.left = `${x1}px`;
+        line.style.top = `${y1}px`;
+        line.style.width = `${len}px`;
+        line.style.transform = `rotate(${angle}deg)`;
+        field.appendChild(line);
+      });
+    })();
+
+    // --- Scene 4: Smoke wisps ---
+    (function generateSmoke() {
+      const container = document.getElementById('smoke-container');
+      for (let i = 0; i < 5; i++) {
+        const w = document.createElement('div');
+        w.className = 'smoke-wisp';
+        w.id = `smoke-${i}`;
+        const size = 4 + i * 2;
+        w.style.cssText = `left:${630 + (i - 2) * 8}px;top:${280 - i * 10}px;width:${size}px;height:${size}px;`;
+        container.appendChild(w);
+      }
+    })();
+
+    // --- Scene 4: Confetti pieces ---
+    (function generateConfetti() {
+      const container = document.getElementById('confetti-container');
+      const confettiColors = ['#FFD6E8','#E8B86D','#DCC9FF','#C9F2DC','#FFDFC0','#EF9FBF'];
+      for (let i = 0; i < 20; i++) {
+        const c = document.createElement('div');
+        c.className = 'confetti-piece';
+        c.id = `confetti-${i}`;
+        const color = confettiColors[i % confettiColors.length];
+        const w = 6 + (i % 4) * 3;
+        const h = 6 + ((i + 1) % 3) * 3;
+        c.style.cssText = `width:${w}px;height:${h}px;background:${color};`;
+        container.appendChild(c);
+      }
+    })();
+
+    // --- Scene 4: Balloons ---
+    (function generateBalloons() {
+      const container = document.getElementById('balloons-container');
+      const balloonColors = ['#FFD6E8','#E8B86D','#DCC9FF','#C9F2DC','#FFDFC0'];
+      const xPositions = [340, 480, 640, 780, 920];
+      balloonColors.forEach((color, i) => {
+        const b = document.createElement('div');
+        b.className = 'balloon';
+        b.id = `balloon-${i}`;
+        b.style.cssText = `left:${xPositions[i]}px;background:${color};`;
+        container.appendChild(b);
+      });
+    })();
+
+
+    // ============================================================
+    // GSAP ANIMATION TIMELINE
+    // ============================================================
+    const tl = gsap.timeline({ paused: true });
+
+    // ----- SCENE 1: THE GIFT (0 - 4.5s) -----
+
+    // Fade in scene
+    tl.fromTo('#scene-gift', { opacity: 0 }, { opacity: 1, duration: 0.3 }, 0);
+
+    // Gift box breathing (continuous scale pulse)
+    tl.fromTo('#gift-box', { scale: 1 }, {
+      scale: 1.03,
+      duration: 1,
+      yoyo: true,
+      repeat: 2,
+      ease: 'sine.inOut'
+    }, 0);
+
+    // Gold glow pulse
+    tl.fromTo('#gift-glow', { opacity: 0.4, scale: 1 }, {
+      opacity: 0.7,
+      scale: 1.1,
+      duration: 1.2,
+      yoyo: true,
+      repeat: 2,
+      ease: 'sine.inOut'
+    }, 0);
+
+    // Tagline fade in at 1.5s
+    tl.fromTo('#gift-tagline', { opacity: 0, y: 10 }, {
+      opacity: 1,
+      y: 0,
+      duration: 0.6,
+      ease: 'power2.out'
+    }, 1.5);
+
+    // Sparkles appear at 2s
+    for (let i = 0; i < 10; i++) {
+      tl.fromTo(`#sparkle-${i}`, {
+        opacity: 0,
+        scale: 0
+      }, {
+        opacity: 0.8,
+        scale: 1,
+        duration: 0.3,
+        ease: 'back.out(2)',
+        yoyo: true,
+        repeat: 1,
+        repeatDelay: 0.1
+      }, 2 + i * 0.12);
+    }
+
+    // Fade out scene 1
+    tl.to('#scene-gift', { opacity: 0, duration: 0.3 }, 4.2);
+
+
+    // ----- SCENE 2: THE GARDEN (4.5 - 9.5s) -----
+
+    // Fade in scene
+    tl.fromTo('#scene-garden', { opacity: 0 }, { opacity: 1, duration: 0.3 }, 4.5);
+
+    // Title fade in
+    tl.fromTo('#garden-title', { opacity: 0, y: -15 }, {
+      opacity: 1, y: 0, duration: 0.5, ease: 'power2.out'
+    }, 4.6);
+
+    // Subtitle fade in
+    tl.fromTo('#garden-subtitle', { opacity: 0, y: -10 }, {
+      opacity: 1, y: 0, duration: 0.4, ease: 'power2.out'
+    }, 4.9);
+
+    // Flower bloom sequence
+    const flowerColors = ['#EF9FBF','#F6C066','#B08FE8','#8FBF87','#7FC7D9','#E8846C'];
+    for (let i = 0; i < 6; i++) {
+      const baseTime = 5.0 + i * 0.5;
+
+      // Stem grows
+      tl.fromTo(`#stem-${i}`, { height: 0 }, {
+        height: 50,
+        duration: 0.4,
+        ease: 'power2.out'
+      }, baseTime);
+
+      // Leaves appear
+      tl.fromTo(`#leaf-l-${i}`, { opacity: 0, scale: 0 }, {
+        opacity: 1, scale: 1, duration: 0.25, ease: 'back.out(2)'
+      }, baseTime + 0.2);
+      tl.fromTo(`#leaf-r-${i}`, { opacity: 0, scale: 0 }, {
+        opacity: 1, scale: 1, duration: 0.25, ease: 'back.out(2)'
+      }, baseTime + 0.3);
+
+      // Flower head blooms with elastic spring
+      tl.fromTo(`#head-${i}`, { scale: 0, rotation: -30 }, {
+        scale: 1, rotation: 0, duration: 0.5, ease: 'elastic.out(1, 0.4)'
+      }, baseTime + 0.3);
+
+      // Memory card fades in
+      tl.fromTo(`#memory-${i}`, { opacity: 0, y: 5 }, {
+        opacity: 1, y: 0, duration: 0.3, ease: 'power2.out'
+      }, baseTime + 0.5);
+    }
+
+    // Falling petals
+    const petalPositions = [
+      { startX: 200, startY: -20, endX: 280, endY: 750, rot: 180, delay: 5.5 },
+      { startX: 500, startY: -20, endX: 440, endY: 750, rot: -240, delay: 6.2 },
+      { startX: 800, startY: -20, endX: 860, endY: 750, rot: 300, delay: 7.0 },
+      { startX: 1050, startY: -20, endX: 990, endY: 750, rot: -200, delay: 7.8 },
+    ];
+    petalPositions.forEach((pd, i) => {
+      tl.fromTo(`#falling-petal-${i}`, {
+        x: 0, y: 0, rotation: 0, opacity: 0.7
+      }, {
+        x: pd.endX - pd.startX,
+        y: pd.endY - pd.startY,
+        rotation: pd.rot,
+        opacity: 0,
+        duration: 3,
+        ease: 'none'
+      }, pd.delay);
+    });
+
+    // Fade out scene 2
+    tl.to('#scene-garden', { opacity: 0, duration: 0.3 }, 9.2);
+
+
+    // ----- SCENE 3: THE CONSTELLATION (9.5 - 14.5s) -----
+
+    // Fade in scene
+    tl.fromTo('#scene-constellation', { opacity: 0 }, { opacity: 1, duration: 0.3 }, 9.5);
+
+    // Title fade in
+    tl.fromTo('#constellation-title', { opacity: 0, y: -15 }, {
+      opacity: 1, y: 0, duration: 0.5, ease: 'power2.out'
+    }, 9.6);
+
+    // Stars appear sequentially
+    const heartPointCount = 10;
+    for (let i = 0; i < heartPointCount; i++) {
+      tl.fromTo(`#cstar-${i}`, {
+        opacity: 0, scale: 0
+      }, {
+        opacity: 1, scale: 1, duration: 0.3, ease: 'back.out(2)'
+      }, 10.0 + i * 0.3);
+    }
+
+    // Lines appear sequentially
+    const lineCount = heartPointCount; // 10 lines (9 sequential + 1 closing)
+    for (let i = 0; i < lineCount; i++) {
+      tl.fromTo(`#cline-${i}`, {
+        opacity: 0, scaleX: 0
+      }, {
+        opacity: 0.6, scaleX: 1, duration: 0.25, ease: 'power2.out'
+      }, 10.2 + i * 0.3);
+    }
+
+    // Heart glow pulse after constellation completes
+    tl.fromTo('#heart-glow', { opacity: 0, scale: 0.8 }, {
+      opacity: 1, scale: 1.1, duration: 0.5, ease: 'power2.out'
+    }, 13.2);
+    tl.fromTo('#heart-glow', { scale: 1.1 }, {
+      scale: 1.25, duration: 0.8, yoyo: true, repeat: 1, ease: 'sine.inOut', immediateRender: false
+    }, 13.7);
+
+    // Shooting star arc
+    tl.fromTo('#shooting-star', {
+      x: 0, y: 0, opacity: 0
+    }, {
+      x: 600, y: 150, opacity: 1, duration: 0.6, ease: 'power2.in'
+    }, 13.3);
+    tl.to('#shooting-star', { opacity: 0, duration: 0.2 }, 13.9);
+
+    // Message fade in
+    tl.fromTo('#constellation-message', { opacity: 0, y: 15 }, {
+      opacity: 1, y: 0, duration: 0.5, ease: 'power2.out'
+    }, 13.8);
+
+    // Fade out scene 3
+    tl.to('#scene-constellation', { opacity: 0, duration: 0.3 }, 14.2);
+
+
+    // ----- SCENE 4: THE FINALE (14.5 - 20s) -----
+
+    // Fade in scene
+    tl.fromTo('#scene-finale', { opacity: 0 }, { opacity: 1, duration: 0.3 }, 14.5);
+
+    // "Make a wish..." fade in
+    tl.fromTo('#finale-wish', { opacity: 0, y: -15 }, {
+      opacity: 1, y: 0, duration: 0.4, ease: 'power2.out'
+    }, 14.6);
+
+    // Candle appears
+    tl.fromTo('#candle-container', { opacity: 0, y: 20 }, {
+      opacity: 1, y: 0, duration: 0.4, ease: 'power2.out'
+    }, 14.7);
+
+    // Flame appears and flickers
+    tl.fromTo('#candle-flame', { opacity: 0, scale: 0 }, {
+      opacity: 1, scale: 1, duration: 0.3, ease: 'back.out(2)'
+    }, 15.0);
+
+    // Flame flicker loop
+    tl.fromTo('#candle-flame', {
+      scaleX: 1, scaleY: 1
+    }, {
+      scaleX: 0.85, scaleY: 1.08, duration: 0.15, yoyo: true, repeat: 12, ease: 'sine.inOut', immediateRender: false
+    }, 15.0);
+
+    // Candle halo pulse
+    tl.fromTo('#candle-halo', { opacity: 0.3, scale: 1 }, {
+      opacity: 0.6, scale: 1.05, duration: 0.4, yoyo: true, repeat: 4, ease: 'sine.inOut'
+    }, 15.0);
+
+    // At 2s into scene (16.5s absolute): flame dies
+    tl.to('#candle-flame', {
+      opacity: 0, scaleY: 0, scaleX: 2, duration: 0.3, ease: 'power2.in', overwrite: 'auto'
+    }, 16.5);
+
+    // Halo fades
+    tl.to('#candle-halo', { opacity: 0, duration: 0.3, overwrite: 'auto' }, 16.5);
+
+    // Smoke wisps rise
+    for (let i = 0; i < 5; i++) {
+      tl.fromTo(`#smoke-${i}`, {
+        opacity: 0.5, y: 0, scale: 1
+      }, {
+        opacity: 0, y: -60 - i * 15, x: (i - 2) * 12, scale: 2 + i * 0.3, duration: 1, ease: 'power1.out'
+      }, 16.6 + i * 0.08);
+    }
+
+    // At 2.3s into scene (16.8s): confetti burst
+    for (let i = 0; i < 20; i++) {
+      const angle = (i / 20) * Math.PI * 2;
+      const dist = 120 + seededRandom() * 200;
+      const endX = Math.cos(angle) * dist;
+      const endY = Math.sin(angle) * dist + 100 + seededRandom() * 150; // gravity
+      const rot = (seededRandom() - 0.5) * 720;
+
+      tl.fromTo(`#confetti-${i}`, {
+        x: 0, y: 0, opacity: 1, rotation: 0, scale: 1
+      }, {
+        x: endX, y: endY, opacity: 0, rotation: rot, scale: 0.5,
+        duration: 1.8, ease: 'power1.out'
+      }, 16.8);
+    }
+
+    // At 2.5s into scene (17.0s): balloons rise
+    const balloonXDrift = [-30, 15, -20, 25, -10];
+    for (let i = 0; i < 5; i++) {
+      tl.fromTo(`#balloon-${i}`, {
+        y: 0, opacity: 0, scale: 0.8
+      }, {
+        y: -700, opacity: 0.9, scale: 1, duration: 3,
+        ease: 'power1.out',
+        x: balloonXDrift[i] * 3
+      }, 17.0 + i * 0.12);
+    }
+
+    // At 3s into scene (17.5s): "Happy Birthday" text
+    tl.fromTo('#finale-birthday', { opacity: 0, scale: 0.8, y: 10 }, {
+      opacity: 1, scale: 1, y: 0, duration: 0.5, ease: 'back.out(1.5)'
+    }, 17.5);
+
+    // Shimmer sweep across "Happy Birthday"
+    tl.fromTo('#birthday-shimmer', { x: -200 }, {
+      x: 400, duration: 1.2, ease: 'power2.inOut'
+    }, 17.8);
+
+    // At 3.5s into scene (18.0s): "MISHTU"
+    tl.fromTo('#finale-name', { opacity: 0, y: 10 }, {
+      opacity: 1, y: 0, duration: 0.4, ease: 'power2.out'
+    }, 18.0);
+
+    // At 4s into scene (18.5s): QR hint
+    tl.fromTo('#finale-qr-hint', { opacity: 0, y: 10 }, {
+      opacity: 1, y: 0, duration: 0.4, ease: 'power2.out'
+    }, 18.5);
+
+    // Final 1s: fade to black
+    tl.to('#fade-to-black', { opacity: 1, duration: 1, ease: 'power2.inOut' }, 19.0);
+
+
+    // ============================================================
+    // REGISTER TIMELINE
+    // ============================================================
+    window.__timelines = window.__timelines || {};
+    window.__timelines["root"] = tl;
+  </script>
+</body>
+</html>

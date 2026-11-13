@@ -137,11 +137,11 @@ List<double> _buildAmbient() {
         out[segStart + i] +=
             0.02 * math.sin(2 * math.pi * freq * 2 * t) * env * lfo;
       }
-      for (int i = 0; i < 22050 * 0.05; i++) {
-        final fade = i / (22050 * 0.05);
-        if (segStart + i >= n) break;
-        out[segStart + i] *= fade;
-      }
+    }
+    for (int i = 0; i < 22050 * 0.05; i++) {
+      final fade = i / (22050 * 0.05);
+      if (segStart + i >= n) break;
+      out[segStart + i] *= fade;
     }
   }
   return _normalizeBy(out, 1.2);

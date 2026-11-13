@@ -53,7 +53,14 @@ class JourneyState extends ChangeNotifier {
     if (bloomJson != null) {
       try {
         final list = jsonDecode(bloomJson) as List;
-        gardenBloomed = list.map((e) => e as bool).toList();
+        final loaded = list.map((e) => e as bool).toList();
+        if (gardenBloomed != null && gardenBloomed!.length == loaded.length) {
+          for (int i = 0; i < loaded.length; i++) {
+            gardenBloomed![i] = loaded[i];
+          }
+        } else {
+          gardenBloomed = loaded;
+        }
         changed = true;
       } catch (_) {}
     }
@@ -61,7 +68,14 @@ class JourneyState extends ChangeNotifier {
     if (litJson != null) {
       try {
         final list = jsonDecode(litJson) as List;
-        treehouseLit = list.map((e) => e as bool).toList();
+        final loaded = list.map((e) => e as bool).toList();
+        if (treehouseLit != null && treehouseLit!.length == loaded.length) {
+          for (int i = 0; i < loaded.length; i++) {
+            treehouseLit![i] = loaded[i];
+          }
+        } else {
+          treehouseLit = loaded;
+        }
         changed = true;
       } catch (_) {}
     }
@@ -98,8 +112,10 @@ class JourneyState extends ChangeNotifier {
   }
 
   /// Mark a single flower as bloomed and persist.
-  void bloomFlower(int index) {
-    final list = gardenBloomed;
+  void bloomFlower(int index, {int? totalCount}) {
+    final list = totalCount != null
+        ? getOrInitGardenBloomed(totalCount)
+        : gardenBloomed;
     if (list == null || index < 0 || index >= list.length) return;
     if (list[index]) return;
     list[index] = true;
@@ -111,8 +127,10 @@ class JourneyState extends ChangeNotifier {
   }
 
   /// Mark a single window as lit and persist.
-  void lightWindow(int index) {
-    final list = treehouseLit;
+  void lightWindow(int index, {int? totalCount}) {
+    final list = totalCount != null
+        ? getOrInitTreehouseLit(totalCount)
+        : treehouseLit;
     if (list == null || index < 0 || index >= list.length) return;
     if (list[index]) return;
     list[index] = true;

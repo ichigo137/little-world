@@ -91,9 +91,7 @@ class _QrScreenState extends State<QrScreen>
     final uri = Uri.parse(AppContent.secretLinkUrl);
     var launched = false;
     try {
-      if (await canLaunchUrl(uri)) {
-        launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
-      }
+      launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (_) {
       launched = false;
     }

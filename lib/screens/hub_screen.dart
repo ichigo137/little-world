@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../content.dart';
 import '../state/journey_state.dart';
+import '../services/audio_manager.dart';
+import '../services/media_catalog.dart';
 import '../theme/app_theme.dart';
 import '../widgets/animated_background.dart';
 import '../widgets/hub_node.dart';
@@ -17,71 +19,122 @@ class HubScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final journey = context.watch<JourneyState>();
+    final media = context.watch<MediaCatalog>();
+
     return Scaffold(
       body: AnimatedSkyBackground(
         gradientColors: AppTheme.nightMoss,
         showClouds: true,
         child: SafeArea(
-          child: Column(
-            children: [
-              const SizedBox(height: 20),
-              Text(
-                'Welcome to your little world',
-                style: GoogleFonts.caveat(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.textLight,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: IntrinsicHeight(
+                    child: Column(
+                      children: [
+                        // Top action row: Mute toggle & Cloud re-sign-in
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              if (media.remoteEnabled && !media.connected)
+                                IconButton(
+                                  tooltip: 'Connect cloud photos',
+                                  icon: const Icon(Icons.cloud_sync_rounded,
+                                      color: AppTheme.mint, size: 22),
+                                  onPressed: () {
+                                    media.reopenGate();
+                                  },
+                                ),
+                              ValueListenableBuilder<bool>(
+                                valueListenable: AudioManager.instance.muted,
+                                builder: (context, muted, _) {
+                                  return IconButton(
+                                    tooltip: muted ? 'Unmute' : 'Mute',
+                                    icon: Icon(
+                                      muted
+                                          ? Icons.volume_off_rounded
+                                          : Icons.volume_up_rounded,
+                                      color: AppTheme.textSoft,
+                                      size: 22,
+                                    ),
+                                    onPressed: () =>
+                                        AudioManager.instance.toggleMute(),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Welcome to your little world',
+                          style: GoogleFonts.caveat(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.textLight,
+                          ),
+                        ),
+                        Text(
+                          'tap around and explore, ${AppContent.herName}',
+                          style: GoogleFonts.comfortaa(
+                            fontSize: 13,
+                            color: AppTheme.textSoft,
+                          ),
+                        ),
+                        const Spacer(),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 24),
+                          child: Wrap(
+                            spacing: 32,
+                            runSpacing: 32,
+                            alignment: WrapAlignment.center,
+                            children: [
+                              HubNode(
+                                icon: Icons.local_florist_rounded,
+                                label: 'Garden',
+                                color: const Color(0xFFEF9FBF),
+                                done: journey.gardenVisited,
+                                onTap: () => _go(context, const GardenScreen()),
+                              ),
+                              HubNode(
+                                icon: Icons.forest_rounded,
+                                label: 'Treehouse',
+                                color: const Color(0xFF8FBF87),
+                                bobOffset: 6,
+                                done: journey.treehouseVisited,
+                                onTap: () => _go(context, const TreehouseScreen()),
+                              ),
+                              HubNode(
+                                icon: Icons.nightlight_round,
+                                label: 'Starry Hill',
+                                color: const Color(0xFF8E86C9),
+                                bobOffset: 12,
+                                done: journey.starryHillVisited,
+                                onTap: () => _go(context, const StarryHillScreen()),
+                              ),
+                              HubNode(
+                                icon: Icons.cake_rounded,
+                                label: 'The Surprise',
+                                color: const Color(0xFFE8B86D),
+                                locked: !journey.allChaptersDone,
+                                onTap: () => _go(context, const FinaleScreen()),
+                                onLockedTap: () => _showLockedHint(context),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Spacer(),
+                        const SizedBox(height: 20),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-              Text(
-                'tap around and explore, ${AppContent.herName}',
-                style: GoogleFonts.comfortaa(
-                  fontSize: 13,
-                  color: AppTheme.textSoft,
-                ),
-              ),
-              const Spacer(),
-              Wrap(
-                spacing: 32,
-                runSpacing: 32,
-                alignment: WrapAlignment.center,
-                children: [
-                  HubNode(
-                    icon: Icons.local_florist_rounded,
-                    label: 'Garden',
-                    color: const Color(0xFFEF9FBF),
-                    done: journey.gardenVisited,
-                    onTap: () => _go(context, const GardenScreen()),
-                  ),
-                  HubNode(
-                    icon: Icons.forest_rounded,
-                    label: 'Treehouse',
-                    color: const Color(0xFF8FBF87),
-                    bobOffset: 6,
-                    done: journey.treehouseVisited,
-                    onTap: () => _go(context, const TreehouseScreen()),
-                  ),
-                  HubNode(
-                    icon: Icons.nightlight_round,
-                    label: 'Starry Hill',
-                    color: const Color(0xFF8E86C9),
-                    bobOffset: 12,
-                    done: journey.starryHillVisited,
-                    onTap: () => _go(context, const StarryHillScreen()),
-                  ),
-                  HubNode(
-                    icon: Icons.cake_rounded,
-                    label: 'The Surprise',
-                    color: const Color(0xFFE8B86D),
-                    locked: !journey.allChaptersDone,
-                    onTap: () => _go(context, const FinaleScreen()),
-                    onLockedTap: () => _showLockedHint(context),
-                  ),
-                ],
-              ),
-              const Spacer(),
-              const SizedBox(height: 20),
-            ],
+              );
+            },
           ),
         ),
       ),

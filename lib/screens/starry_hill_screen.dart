@@ -37,7 +37,7 @@ class _StarryHillScreenState extends State<StarryHillScreen>
     _glow = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1300),
-    );
+    )..repeat();
     _sky = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 90),
@@ -126,6 +126,8 @@ class _StarryHillScreenState extends State<StarryHillScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       body: GestureDetector(
+        key: const Key('starry_hill_tap'),
+        behavior: HitTestBehavior.opaque,
         onTap: _handleTap,
         child: AnimatedSkyBackground(
           gradientColors: const [AppTheme.skyNightDeep, AppTheme.skyNight],
@@ -165,6 +167,7 @@ class _StarryHillScreenState extends State<StarryHillScreen>
                               painter: _ConstellationPainter(
                                 points: _heartPoints,
                                 revealed: _revealed,
+                                glowValue: _glow.value,
                                 pulse: _showMessage
                                     ? _heartbeat(_glow.value)
                                     : 0,
@@ -186,12 +189,13 @@ class _StarryHillScreenState extends State<StarryHillScreen>
                         },
                       ),
                       if (_showMessage)
-                        Center(
+                        Align(
+                          alignment: const Alignment(0, 0.72),
                           child: AnimatedOpacity(
                             duration: const Duration(milliseconds: 800),
                             opacity: 1,
                             child: Container(
-                              margin: const EdgeInsets.all(28),
+                              margin: const EdgeInsets.symmetric(horizontal: 28),
                               padding: const EdgeInsets.all(20),
                               decoration: BoxDecoration(
                                 color: AppTheme.nightSoft.withValues(alpha: 0.92),
@@ -293,16 +297,42 @@ class _MilkyWayPainter extends CustomPainter {
 class _ConstellationPainter extends CustomPainter {
   final List<Offset> points;
   final int revealed;
+  final double glowValue;
   final double pulse; // heartbeat value 0..1 once complete
   _ConstellationPainter({
     required this.points,
     required this.revealed,
+    this.glowValue = 0,
     this.pulse = 0,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     final complete = revealed >= points.length && points.length > 1;
+
+    // Draw faint twinkling ghost stars for unrevealed constellation points
+    if (!complete) {
+      for (int i = revealed; i < points.length; i++) {
+        final p = Offset(points[i].dx * size.width, points[i].dy * size.height);
+        final isNext = i == revealed;
+        final nextPulse = (sin((glowValue * 2 * pi) + i) + 1) / 2; // 0..1
+        final alpha = isNext ? 0.35 + 0.35 * nextPulse : 0.15 + 0.12 * sin(glowValue * 2 * pi + i);
+        final ghostRadius = isNext ? 2.5 + 1.2 * nextPulse : 1.8;
+
+        if (isNext) {
+          canvas.drawCircle(
+            p,
+            ghostRadius * 2.2,
+            Paint()..color = AppTheme.gold.withValues(alpha: alpha * 0.4),
+          );
+        }
+        canvas.drawCircle(
+          p,
+          ghostRadius,
+          Paint()..color = Colors.white.withValues(alpha: alpha.clamp(0.0, 1.0)),
+        );
+      }
+    }
 
     // The whole heart gently thumps with the pulse.
     canvas.save();
@@ -350,7 +380,9 @@ class _ConstellationPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _ConstellationPainter oldDelegate) =>
-      oldDelegate.revealed != revealed || oldDelegate.pulse != pulse;
+      oldDelegate.revealed != revealed ||
+      oldDelegate.pulse != pulse ||
+      oldDelegate.glowValue != glowValue;
 }
 
 class _ShootingStarPainter extends CustomPainter {

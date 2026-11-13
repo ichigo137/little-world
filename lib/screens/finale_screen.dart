@@ -35,6 +35,7 @@ class _FinaleScreenState extends State<FinaleScreen>
 
   StreamSubscription<NoiseReading>? _noiseSub;
   bool _micOn = false;
+  bool _requestingMic = false;
   double _micLevel = 0;
   double _baseline = 60;
   double _baselineSum = 0;
@@ -108,37 +109,56 @@ class _FinaleScreenState extends State<FinaleScreen>
       _stopMic();
       return;
     }
-    if (_blownOut) return;
-    var granted = await Permission.microphone.isGranted;
-    if (!granted) {
-      granted = await Permission.microphone.request().isGranted;
-    }
-    if (!mounted) return;
-    if (!granted) {
+    if (_blownOut || _requestingMic) return;
+    _requestingMic = true;
+    try {
+      var granted = await Permission.microphone.isGranted;
+      if (!granted) {
+        granted = await Permission.microphone.request().isGranted;
+      }
+      if (!mounted) return;
+      if (!granted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'mic isn\u2019t allowed here \u2014 hold the circle to blow instead',
+              style: GoogleFonts.comfortaa(fontSize: 13),
+            ),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: AppTheme.nightSoft,
+          ),
+        );
+        return;
+      }
+      _noiseSub?.cancel();
+      _baselineSum = 0;
+      _baselineSamples = 0;
+      _blowStreak = 0;
+      setState(() {
+        _micOn = true;
+        _micLevel = 0;
+      });
+      _noiseSub = NoiseMeter().noise.listen(
+        _onNoise,
+        onError: (_) => _stopMic(),
+        cancelOnError: true,
+      );
+    } catch (_) {
+      if (!mounted) return;
+      _stopMic();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'mic isn\u2019t allowed here \u2014 hold the circle to blow instead',
+            'mic isn\u2019t available here \u2014 hold the circle to blow instead',
             style: GoogleFonts.comfortaa(fontSize: 13),
           ),
           behavior: SnackBarBehavior.floating,
           backgroundColor: AppTheme.nightSoft,
         ),
       );
-      return;
+    } finally {
+      _requestingMic = false;
     }
-    _baselineSum = 0;
-    _baselineSamples = 0;
-    _blowStreak = 0;
-    setState(() {
-      _micOn = true;
-      _micLevel = 0;
-    });
-    _noiseSub = NoiseMeter().noise.listen(
-      _onNoise,
-      onError: (_) => _stopMic(),
-      cancelOnError: true,
-    );
   }
 
   void _onNoise(NoiseReading reading) {
@@ -248,6 +268,7 @@ class _FinaleScreenState extends State<FinaleScreen>
         ),
         const SizedBox(height: 48),
         GestureDetector(
+          key: const Key('candle_gesture'),
           onLongPressStart: (_) => _startBlow(),
           onLongPressEnd: (_) => _cancelBlow(),
           onLongPressCancel: () => _cancelBlow(),
@@ -362,120 +383,129 @@ class _FinaleScreenState extends State<FinaleScreen>
     return AnimatedOpacity(
       duration: const Duration(milliseconds: 900),
       opacity: 1,
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Gold title with a slow shimmer band sweeping across it.
-            AnimatedBuilder(
-              animation: _shimmer,
-              builder: (context, child) => ShaderMask(
-                shaderCallback: (bounds) {
-                  final t = _shimmer.value;
-                  return LinearGradient(
-                    begin: Alignment(-1.6 + 3.2 * t, 0),
-                    end: Alignment(-0.6 + 3.2 * t, 0),
-                    colors: const [
-                      Color(0xFFE8B86D),
-                      Colors.white,
-                      Color(0xFFEF9FBF),
-                    ],
-                  ).createShader(bounds);
-                },
-                child: child,
-              ),
-              child: Text(
-                AppContent.finaleTitle,
-                style: GoogleFonts.caveat(
-                  fontSize: 46,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-            Text(
-              AppContent.herName,
-              style: GoogleFonts.caveat(
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.textLight,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppTheme.nightSoft.withValues(alpha: 0.92),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(
-                  color: AppTheme.lavender.withValues(alpha: 0.35),
-                  width: 1,
-                ),
-              ),
-              child: Text(
-                AppContent.finaleMessage,
-                textAlign: TextAlign.center,
-                style: GoogleFonts.comfortaa(
-                    fontSize: 14, height: 1.6, color: AppTheme.textLight),
-              ),
-            ),
-            const SizedBox(height: 24),
-            TextButton(
-              onPressed: () => _openSecret(context),
-              style: TextButton.styleFrom(
-                backgroundColor: AppTheme.blush.withValues(alpha: 0.16),
-                foregroundColor: AppTheme.textLight,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
-                shape: const StadiumBorder(),
-                side: const BorderSide(
-                  color: AppTheme.blush,
-                  width: 1.5,
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.qr_code_2_rounded, size: 20),
-                  const SizedBox(width: 8),
-                  Text(
-                    'one more little thing',
-                    style: GoogleFonts.caveat(
-                      fontSize: 19,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.textLight,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Gold title with a slow shimmer band sweeping across it.
+                    AnimatedBuilder(
+                      animation: _shimmer,
+                      builder: (context, child) => ShaderMask(
+                        shaderCallback: (bounds) {
+                          final t = _shimmer.value;
+                          return LinearGradient(
+                            begin: Alignment(-1.6 + 3.2 * t, 0),
+                            end: Alignment(-0.6 + 3.2 * t, 0),
+                            colors: const [
+                              Color(0xFFE8B86D),
+                              Colors.white,
+                              Color(0xFFEF9FBF),
+                            ],
+                          ).createShader(bounds);
+                        },
+                        child: child,
+                      ),
+                      child: Text(
+                        AppContent.finaleTitle,
+                        style: GoogleFonts.caveat(
+                          fontSize: 46,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                    Text(
+                      AppContent.herName,
+                      style: GoogleFonts.caveat(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.textLight,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: AppTheme.nightSoft.withValues(alpha: 0.92),
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(
+                          color: AppTheme.lavender.withValues(alpha: 0.35),
+                          width: 1,
+                        ),
+                      ),
+                      child: Text(
+                        AppContent.finaleMessage,
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.comfortaa(
+                            fontSize: 14, height: 1.6, color: AppTheme.textLight),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    TextButton(
+                      onPressed: () => _openSecret(context),
+                      style: TextButton.styleFrom(
+                        backgroundColor: AppTheme.blush.withValues(alpha: 0.16),
+                        foregroundColor: AppTheme.textLight,
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+                        shape: const StadiumBorder(),
+                        side: const BorderSide(
+                          color: AppTheme.blush,
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.qr_code_2_rounded, size: 20),
+                          const SizedBox(width: 8),
+                          Text(
+                            'one more little thing',
+                            style: GoogleFonts.caveat(
+                              fontSize: 19,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.textLight,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextButton.icon(
+                      onPressed: () => _openPlaylist(context),
+                      icon: const Icon(Icons.music_note_rounded, color: AppTheme.mint),
+                      label: Text(
+                        'the soundtrack of us',
+                        style: GoogleFonts.comfortaa(color: AppTheme.textSoft),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextButton.icon(
+                      onPressed: () {
+                        context.read<JourneyState>().reset();
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(builder: (_) => const GiftScreen()),
+                          (route) => false,
+                        );
+                      },
+                      icon: const Icon(Icons.replay_rounded, color: AppTheme.textSoft),
+                      label: Text(
+                        'replay the journey',
+                        style: GoogleFonts.comfortaa(color: AppTheme.textSoft),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 8),
-            TextButton.icon(
-              onPressed: () => _openPlaylist(context),
-              icon: const Icon(Icons.music_note_rounded, color: AppTheme.mint),
-              label: Text(
-                'the soundtrack of us',
-                style: GoogleFonts.comfortaa(color: AppTheme.textSoft),
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextButton.icon(
-              onPressed: () {
-                context.read<JourneyState>().reset();
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (_) => const GiftScreen()),
-                  (route) => false,
-                );
-              },
-              icon: const Icon(Icons.replay_rounded, color: AppTheme.textSoft),
-              label: Text(
-                'replay the journey',
-                style: GoogleFonts.comfortaa(color: AppTheme.textSoft),
-              ),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
