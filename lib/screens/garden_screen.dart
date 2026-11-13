@@ -118,63 +118,80 @@ class _GardenScreenState extends State<GardenScreen>
                     ),
                   ),
                   Expanded(
-                    child: GridView.builder(
-                      padding: const EdgeInsets.all(28),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 3,
-                        mainAxisSpacing: 24,
-                        crossAxisSpacing: 16,
-                      ),
-                      itemCount: memories.length,
-                      itemBuilder: (context, index) {
-                        return _Flower(
-                          key: ValueKey('flower_$index'),
-                          bloomed: bloomed[index],
-                          colorSeed: index,
-                          onTap: () async {
-                            if (!bloomed[index]) {
-                              HapticFeedback.mediumImpact();
-                              context.read<JourneyState>().bloomFlower(
-                                    index,
-                                    totalCount: memories.length,
+                    child: Center(
+                      child: SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
+                          child: GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              mainAxisSpacing: 28,
+                              crossAxisSpacing: 16,
+                              childAspectRatio: 0.78,
+                            ),
+                            itemCount: memories.length,
+                            itemBuilder: (context, index) {
+                              return _Flower(
+                                key: ValueKey('flower_$index'),
+                                bloomed: bloomed[index],
+                                colorSeed: index,
+                                onTap: () async {
+                                  if (!bloomed[index]) {
+                                    HapticFeedback.mediumImpact();
+                                    context.read<JourneyState>().bloomFlower(
+                                          index,
+                                          totalCount: memories.length,
+                                        );
+                                    AudioManager.instance.play(Sfx.bloom);
+                                  }
+                                  await showMemoryReveal(
+                                    context,
+                                    memories[index],
+                                    accent: _flowerColor(index),
                                   );
-                              AudioManager.instance.play(Sfx.bloom);
-                            }
-                            await showMemoryReveal(
-                              context,
-                              memories[index],
-                              accent: _flowerColor(index),
-                            );
-                            _checkComplete(bloomed);
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                  if (allBloomed)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 24),
-                      child: TextButton.icon(
-                        onPressed: () => Navigator.of(context).pop(),
-                        icon: const Icon(Icons.arrow_back_rounded,
-                            size: 18, color: AppTheme.textDark),
-                        label: Text(
-                          'back to your world \u2728',
-                          style: GoogleFonts.comfortaa(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.textDark,
+                                  _checkComplete(bloomed);
+                                },
+                              );
+                            },
                           ),
                         ),
-                        style: TextButton.styleFrom(
-                          backgroundColor: AppTheme.gold,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 12),
-                          shape: const StadiumBorder(),
+                      ),
+                    ),
+                  ),
+                  AnimatedOpacity(
+                    opacity: allBloomed ? 1.0 : 0.0,
+                    duration: const Duration(milliseconds: 600),
+                    child: IgnorePointer(
+                      ignoring: !allBloomed,
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 24, top: 8),
+                        child: TextButton.icon(
+                          onPressed: () => Navigator.of(context).pop(),
+                          icon: const Icon(Icons.arrow_back_rounded,
+                              size: 18, color: AppTheme.textDark),
+                          label: Text(
+                            'back to your world \u2728',
+                            style: GoogleFonts.comfortaa(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.textDark,
+                            ),
+                          ),
+                          style: TextButton.styleFrom(
+                            backgroundColor: AppTheme.gold,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 12),
+                            shape: const StadiumBorder(),
+                          ),
                         ),
                       ),
                     ),
+                  ),
                 ],
               ),
               // Falling petals drift over everything, under the dialogs.
@@ -403,11 +420,38 @@ class _FlowerPainter extends CustomPainter {
     }
 
     if (growth < 0.15) {
-      // A tiny sprout before blooming starts.
+      // Soft soil mound at the base
+      final moundPaint = Paint()
+        ..color = const Color(0xFF263A29).withValues(alpha: 0.5)
+        ..style = PaintingStyle.fill;
+      canvas.drawOval(
+        Rect.fromCenter(center: Offset(cx, baseY), width: 22, height: 7),
+        moundPaint,
+      );
+
+      // Baby sprout stem
+      final sproutStem = Paint()
+        ..color = const Color(0xFF7FA97C)
+        ..strokeWidth = 2.5
+        ..strokeCap = StrokeCap.round
+        ..style = PaintingStyle.stroke;
+      canvas.drawLine(Offset(cx, baseY), Offset(cx, baseY - 12), sproutStem);
+
+      // Two tiny seedling leaves
+      _drawLeaf(canvas, Offset(cx - 1, baseY - 6), -2.2, 7);
+      _drawLeaf(canvas, Offset(cx + 1, baseY - 8), 2.2 - pi, 7);
+
+      // Soft colored flower bud waiting to bloom
+      final budColor = color.withValues(alpha: 0.85);
       canvas.drawCircle(
-        Offset(cx, baseY - 4),
-        3,
-        Paint()..color = const Color(0xFF9DBF8A),
+        Offset(cx, baseY - 14),
+        8,
+        Paint()..color = color.withValues(alpha: 0.25),
+      );
+      canvas.drawCircle(
+        Offset(cx, baseY - 14),
+        4.5,
+        Paint()..color = budColor,
       );
       return;
     }
