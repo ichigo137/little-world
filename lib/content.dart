@@ -55,27 +55,49 @@ class AppContent {
   static const List<MemoryItem> gardenMemories = [
     MemoryItem(
         message:
-            'The first time we talked, I knew this year would be different.', photoAsset: null),
+            'The first time we talked, I knew this year would be different.',
+        photoAsset: null),
     MemoryItem(
         message:
-            'That random Tuesday we laughed for two hours straight over nothing.', photoAsset: null),
-    MemoryItem(message: 'The way you say my name right before you roast me.', photoAsset: null),
+            'That random Tuesday we laughed for two hours straight over nothing.',
+        photoAsset: null),
     MemoryItem(
-        message: 'Every playlist you\'ve ever sent me — still on repeat.', photoAsset: null),
+        message: 'The way you say my name right before you roast me.',
+        photoAsset: null),
     MemoryItem(
-        message: 'The dumb inside joke only the two of us will ever get.', photoAsset: null),
-    MemoryItem(message: 'You, in general. That\'s the memory.', photoAsset: null),
+        message: 'Every playlist you\'ve ever sent me — still on repeat.',
+        photoAsset: null),
+    MemoryItem(
+        message: 'The dumb inside joke only the two of us will ever get.',
+        photoAsset: null),
+    MemoryItem(
+        message: 'You, in general. That\'s the memory.', photoAsset: null),
   ];
 
   // ---------------- THE TREEHOUSE ----------------
   // 4-5 windows, each meant to hold a real photo + caption.
   // Replace photoAsset: null with the path once you've added images.
   static const List<MemoryItem> treehouseMemories = [
-    MemoryItem(message: 'Write a caption for this photo...', photoAsset: null),
-    MemoryItem(message: 'Write a caption for this photo...', photoAsset: null),
-    MemoryItem(message: 'Write a caption for this photo...', photoAsset: null),
-    MemoryItem(message: 'Write a caption for this photo...', photoAsset: null),
-    MemoryItem(message: 'Write a caption for this photo...', photoAsset: null),
+    MemoryItem(
+      message: 'One of those little moments I want to keep.',
+      photoAsset: null,
+    ),
+    MemoryItem(
+      message: 'Somewhere between ordinary and unforgettable.',
+      photoAsset: null,
+    ),
+    MemoryItem(
+      message: 'A small piece of our story.',
+      photoAsset: null,
+    ),
+    MemoryItem(
+      message: 'A moment that still makes me smile.',
+      photoAsset: null,
+    ),
+    MemoryItem(
+      message: 'One for the memory box.',
+      photoAsset: null,
+    ),
   ];
 
   // ---------------- STARRY HILL ----------------

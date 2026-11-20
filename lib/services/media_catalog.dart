@@ -106,18 +106,29 @@ class MediaCatalog extends ChangeNotifier {
     }
 
     try {
-      final bytes = await client!
-          .storage
-          .from(bucketName)
-          .download('manifest.json');
+      final bytes =
+          await client!.storage.from(bucketName).download('manifest.json');
       final decoded = jsonDecode(utf8.decode(bytes));
       if (decoded is! Map<String, dynamic>) {
         throw const FormatException('The photo manifest is not a JSON object.');
       }
 
+      final version = decoded['version'];
+      if (version != null && version != 1) {
+        throw FormatException('Unsupported photo manifest version: $version');
+      }
+
       final results = await Future.wait([
-        _mergeMemories(decoded['garden'], AppContent.gardenMemories),
-        _mergeMemories(decoded['treehouse'], AppContent.treehouseMemories),
+        _mergeMemories(
+          decoded['garden'],
+          AppContent.gardenMemories,
+          collection: 'garden',
+        ),
+        _mergeMemories(
+          decoded['treehouse'],
+          AppContent.treehouseMemories,
+          collection: 'treehouse',
+        ),
       ]);
       gardenMemories = results[0];
       treehouseMemories = results[1];
@@ -143,31 +154,34 @@ class MediaCatalog extends ChangeNotifier {
 
   Future<List<MemoryItem>> _mergeMemories(
     dynamic rawItems,
-    List<MemoryItem> fallback,
-  ) async {
+    List<MemoryItem> fallback, {
+    required String collection,
+  }) async {
     if (rawItems is! List) return fallback;
 
     return Future.wait(
       List.generate(fallback.length, (index) async {
         final raw = index < rawItems.length ? rawItems[index] : null;
-        if (raw is! Map) {
-          return fallback[index];
-        }
+        if (raw is! Map) return fallback[index];
 
-        final message = raw['message'] is String
-            ? raw['message'] as String
+        final rawMessage = raw['message'];
+        final message = rawMessage is String && rawMessage.trim().isNotEmpty
+            ? rawMessage.trim()
             : fallback[index].message;
-        final path = raw['path'] is String ? raw['path'] as String : null;
+        final rawPath = raw['path'];
+        final path = rawPath is String ? rawPath.trim() : null;
 
         String? signedUrl;
-        if (path != null &&
-            path.startsWith('photos/') &&
-            !path.contains('..') &&
-            !path.startsWith('/')) {
-          signedUrl = await client!
-              .storage
-              .from(bucketName)
-              .createSignedUrl(path, signedUrlLifetimeSeconds);
+        if (path != null && _isSafePhotoPath(path, collection)) {
+          // A single missing/corrupt photo must not prevent the other
+          // memories (or the entire app) from loading.
+          try {
+            signedUrl = await client!.storage
+                .from(bucketName)
+                .createSignedUrl(path, signedUrlLifetimeSeconds);
+          } catch (_) {
+            signedUrl = null;
+          }
         }
 
         return MemoryItem(
@@ -177,6 +191,27 @@ class MediaCatalog extends ChangeNotifier {
         );
       }),
     );
+  }
+
+  bool _isSafePhotoPath(String path, String collection) {
+    if (path.startsWith('/') ||
+        path.contains('..') ||
+        path.contains('\\') ||
+        path.contains('?') ||
+        path.contains('#')) {
+      return false;
+    }
+
+    final segments = path.split('/');
+    if (segments.length != 3 ||
+        segments[0] != 'photos' ||
+        segments[1] != collection ||
+        segments[2].isEmpty) {
+      return false;
+    }
+
+    final extension = segments[2].split('.').last.toLowerCase();
+    return const {'jpg', 'jpeg', 'png', 'webp'}.contains(extension);
   }
 
   String _friendlyError(Object error) {

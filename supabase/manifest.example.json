@@ -1,18 +1,18 @@
 {
   "version": 1,
   "garden": [
-    { "message": "The first time we talked, I knew this year would be different.", "path": "photos/garden/garden_01.webp" },
-    { "message": "That random Tuesday we laughed for two hours straight over nothing.", "path": "photos/garden/garden_02.webp" },
-    { "message": "The way you say my name right before you roast me.", "path": "photos/garden/garden_03.webp" },
-    { "message": "Every playlist you've ever sent me — still on repeat.", "path": "photos/garden/garden_04.webp" },
-    { "message": "The dumb inside joke only the two of us will ever get.", "path": "photos/garden/garden_05.webp" },
-    { "message": "You, in general. That's the memory.", "path": "photos/garden/garden_06.webp" }
+    { "message": "", "path": "photos/garden/garden_01.webp" },
+    { "message": "", "path": "photos/garden/garden_02.webp" },
+    { "message": "", "path": "photos/garden/garden_03.webp" },
+    { "message": "", "path": "photos/garden/garden_04.webp" },
+    { "message": "", "path": "photos/garden/garden_05.webp" },
+    { "message": "", "path": "photos/garden/garden_06.webp" }
   ],
   "treehouse": [
-    { "message": "Add your caption here.", "path": "photos/treehouse/treehouse_01.webp" },
-    { "message": "Add your caption here.", "path": "photos/treehouse/treehouse_02.webp" },
-    { "message": "Add your caption here.", "path": "photos/treehouse/treehouse_03.webp" },
-    { "message": "Add your caption here.", "path": "photos/treehouse/treehouse_04.webp" },
-    { "message": "Add your caption here.", "path": "photos/treehouse/treehouse_05.webp" }
+    { "message": "", "path": "photos/treehouse/treehouse_01.webp" },
+    { "message": "", "path": "photos/treehouse/treehouse_02.webp" },
+    { "message": "", "path": "photos/treehouse/treehouse_03.webp" },
+    { "message": "", "path": "photos/treehouse/treehouse_04.webp" },
+    { "message": "", "path": "photos/treehouse/treehouse_05.webp" }
   ]
 }

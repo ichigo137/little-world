@@ -107,22 +107,25 @@ Happy birthday to her. Good luck. 🎂
 
 ---
 
-## 5. Optional Supabase photo storage
+## 5. Supabase photo storage
 
-The app keeps all songs and playlist artwork bundled in `assets/music/`. Supabase stores only the Garden and Treehouse photos plus `manifest.json`.
+The app uses the private `her-little-world-photos` bucket for Garden and Treehouse memories. Music remains bundled locally.
 
-- `supabase/` — private bucket SQL setup, sample manifest and setup instructions.
-- `lib/services/media_catalog.dart` — authenticates and loads photo memories from Supabase Storage.
-- `lib/widgets/media_access_gate.dart` — email/password sign-in for the private photo collection.
+- `supabase/README.md` — bucket layout, manifest format, access policy and setup.
+- `supabase/manifest.example.json` — starter manifest for the 6 Garden and 5 Treehouse photos.
+- `supabase/local.config.example.json` — local-only project URL and publishable-key template.
+- `lib/services/media_catalog.dart` — sign-in, manifest loading and short-lived signed photo URLs.
 
-Follow `supabase/README.md` to configure the project, create Mishtu's user, create the private bucket and upload photos.
-
-Run the app with:
+Follow `supabase/README.md` and use the Supabase project that owns the intended bucket. Copy `supabase/local.config.example.json` to `supabase/local.config.json`, fill in the Project URL and publishable key, then run:
 
 ```powershell
-flutter run --dart-define=SUPABASE_URL=https://<project-ref>.supabase.co --dart-define=SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+flutter run --dart-define-from-file=supabase/local.config.json
 ```
 
-Build the release APK with the same two `--dart-define` values.
+Build the release APK with:
 
-Never place a Supabase secret or service-role key in the Flutter app. Keep public sign-ups disabled and use the publishable key with Storage RLS. The playlist remains available offline even when the photo service is not configured.
+```powershell
+flutter build apk --release --dart-define-from-file=supabase/local.config.json
+```
+
+The local config file is Git-ignored. Never put a Supabase secret or service-role key in the Flutter app. Keep the bucket private, disable public sign-ups, and grant the recipient's authenticated account read access only. The app falls back to local captions/placeholders if cloud photos are unavailable; the playlist always works offline.
